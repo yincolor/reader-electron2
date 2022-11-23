@@ -1,0 +1,21 @@
+{
+  "name": "reader-electron2",
+  "version": "2.0.1",
+  "description": "reader gui by electron.",
+  "main": "./src/main/main.js",
+  "scripts": {
+    "test": "electron ."
+  },
+  "keywords": [
+    "application",
+    "gui"
+  ],
+  "author": "ty",
+  "license": "GPL-3.0-or-later",
+  "devDependencies": {
+    "electron": "^20.1.4",
+    "iconv-lite": "^0.6.3",
+    "encoding": "^0.1.0",
+    "node-fetch": "^2.6.7"
+  }
+}

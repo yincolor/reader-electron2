@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <!-- <script src="./db.js"></script> -->
+    <script src="./jsstore.min.js"></script>
+    <script src="./jsstore.worker.min.js"></script>
+</head>
+
+<body>
+
+
+    <script>
+        var connection = new JsStore.Connection();
+        async function createDatabase() {
+            let table_user = {
+                name: 'user',
+                columns: {
+                    id: { primaryKey: true, autoIncrement: true },
+                    user_id: {dataType: 'string', unique: true, notNull: true },
+                    user_name: { dataType: 'string', notNull: true },
+                    age: { dataType: 'number', notNull: true },
+                    start_date: { dataType: 'string', notNull: true },
+                    prov_code: { dataType: 'string', notNull: true },
+                }
+            };
+            let table_user_product = {
+                name: 'user_product',
+                user_id: { dataType: 'string', unique: true, notNull: true },
+                product_id: { dataType: 'number', notNull: true },
+                start_date: { dataType: 'string', notNull: true },
+                end_date: { dataType: 'string', notNull: true },
+            };
+
+            let database = {
+                name: 'cbss',
+                tables: [table_user, table_user_product],
+            };
+            console.log('开始创建数据库');
+            let isDbCreated = await connection.initDb(database);
+
+            console.log('是否创建数据库？', isDbCreated);
+        }
+
+
+        async function insertUser(user_id, user_name, age, prov_code){
+            let now = (new Date()).toLocaleString();
+            let val = {
+                user_id: user_id, user_name: user_name, age: age, start_date: now, prov_code: prov_code
+            }
+            let noOfRowsInserted = await connection.insert({
+                into: 'user', 
+                values:[val]
+            });
+            console.log(noOfRowsInserted);
+        }
+
+        async function selectAllUser(){
+            let res = await connection.select({ from: 'user' });
+            console.log(res);
+        }
+
+    </script>
+</body>
+
+</html>

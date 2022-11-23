@@ -1,0 +1,71 @@
+:root {
+    --bar-height: 50px
+}
+
+/*滚动条样式*/
+::-webkit-scrollbar{ width: 2px; height:fit-content; }
+::-webkit-scrollbar-button{ width: 2px; height: 0; }
+::-webkit-scrollbar-track{background:0 0}
+::-webkit-scrollbar-thumb{background:#61a8df;-webkit-transition:.3s;transition:.3s}
+::-webkit-scrollbar-thumb:hover{background-color:#37dace}
+::-webkit-scrollbar-thumb:active{background-color:#17bbaf}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #00ff00;
+    /* overflow: hidden; */
+}
+
+div {
+    margin: 0;
+    padding: 0;
+}
+
+/* 按钮的样式 */
+.btn {
+    caret-color: transparent;
+    /*隐藏光标竖条*/
+    cursor: pointer;
+    /*光标显示手型*/
+    min-width: 3em;
+}
+
+.btn:hover {
+    background-color: rgba(100, 100, 100, 0.5);
+}
+
+
+.container {
+    position: absolute;
+    top: 20px;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    background-color: #ffffff;
+}
+
+.page {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+.shelf_title_group {
+    flex-grow: 1;
+    display: flex;
+    justify-content: flex-start;
+    line-height: var(--bar-height);
+}
+
+.shelf_title_group div {
+    min-width: 50px;
+}
+
+/*隐藏*/
+.hide {
+    display: none;
+}

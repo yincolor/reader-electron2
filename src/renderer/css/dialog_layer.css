@@ -1,0 +1,72 @@
+/* 弹出层 */
+.dialog_layer{
+    position: fixed;
+    top: 0; bottom: 0; left: 0; right: 0;
+    background-color: #fff;
+    z-index: 100; /*保证弹出层会一直处于最前面*/
+}
+
+.dialog_layer::before{
+    content: "";
+    height: 50%;
+    display: block;
+}
+
+.dialog_layer .dialog{
+    width: max-content; /*dialog宽度由子元素决定*/
+    transform: translateY(-50%);
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    background-color: #fff;
+    box-shadow: 10px 10px 40px #383838;
+    border: 1px solid #383838;
+}
+
+.dialog_layer .dialog .text{
+    width: var(--alert-width);
+    min-height: var(--bar-height);
+    line-height: var(--bar-height);
+    flex-grow: 1;
+}
+
+/* 警告弹窗 */
+.dialog_layer .alert{
+    --alert-width:200px;
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+}
+.dialog_layer .alert .text{
+    width: var(--alert-width);
+    min-height: var(--bar-height);
+    line-height: var(--bar-height);
+    flex-grow: 1;
+}
+.dialog_layer .alert .btn{
+    width: calc( var(--alert-width) );
+    box-sizing: border-box;
+    border: 1px solid #232323;
+    text-align: center;
+    line-height: var(--bar-height);
+}
+
+
+/* 专门用来做菜单的一种弹窗 */
+.dialog_layer .menu .btn{
+    width: 200px;
+    height: var(--bar-height);
+    text-align: center;
+    line-height: var(--bar-height);
+    /* margin-top: -2px; 解决两个按钮 重叠的问题 */
+} 
+
+
+.dialog_layer .menu .btn:not(:last-child){
+    border-bottom: 1px solid #000;
+}
+
+
+.dialog_layer .hide{
+    display: none; 
+}

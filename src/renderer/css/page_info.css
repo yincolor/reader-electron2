@@ -1,0 +1,82 @@
+/*书源插件页面*/
+.container .info .view{
+    position: absolute;
+    height: 100%;width: 100%;
+}
+
+.container .info .view .head {
+    position: absolute;
+    height: var(--bar-height);
+    width: 100%;
+    top: 0;
+    left: 0;
+    background-color: #AA7A7A;
+
+    display: flex;
+    justify-content: flex-start;
+}
+.container .info .view .body {
+    position: absolute;
+    top: var(--bar-height);
+    bottom: var(--bar-height);
+    width: 100%;
+    background-color: #fff;
+    display: flex;
+    flex-direction: column;
+}
+
+.container .info .view .body .item{
+    height: var(--bar-height);
+    line-height: var(--bar-height);
+    padding: 0 20px;
+    border-bottom: 2px solid #000;
+}
+
+.container .info .view .body .item:is(:last-child){
+    flex-grow: 1;
+    border-bottom: 0px;
+}
+
+.container .info .view .body .btn_line{
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+}
+
+.container .info .view .body .btn_line span:nth-child(2){
+    flex-grow: 1;
+}
+
+.container .info .view .body .btn_line .btn{
+    /* background-color: #aa7777; */
+    color: red;
+}
+
+.container .info .view .foot {
+    position: absolute;
+    bottom: 0px;
+    height: var(--bar-height);
+    width: 100%;
+    background-color: #AA7A7A;
+
+    display: flex;
+    justify-content: center;
+}
+
+.container .info .view .foot .btn{
+    flex: auto;
+    text-align: center;
+    line-height: var(--bar-height);
+}
+
+.container .info .view .head .btn{
+    padding-right: 10px; padding-left: 10px;
+    width: calc( var(--bar-height) + 10px);
+    text-align: center;
+    line-height: var(--bar-height);
+}
+
+.container .info .view .head .btn:nth-child(2){
+    flex-grow: 1;
+}
+

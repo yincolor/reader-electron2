@@ -1,0 +1,86 @@
+/*书源插件页面*/
+.container .plugin .view{
+    position: absolute;
+    height: 100%;width: 100%;
+}
+
+.container .plugin .view .head {
+    position: absolute;
+    height: var(--bar-height);
+    width: 100%;
+    top: 0;
+    left: 0;
+    background-color: #AA7A7A;
+
+    display: flex;
+    justify-content: flex-start;
+}
+.container .plugin .view .body {
+    position: absolute;
+    top: var(--bar-height);
+    bottom: var(--bar-height);
+    width: 100%;
+    background-color: #fff;
+}
+.container .plugin .view .foot {
+    position: absolute;
+    bottom: 0px;
+    height: var(--bar-height);
+    width: 100%;
+    background-color: #AA7A7A;
+
+    display: flex;
+    justify-content: center;
+}
+
+.container .plugin .view .foot .btn{
+    flex: auto;
+    text-align: center;
+    line-height: var(--bar-height);
+}
+
+.container .plugin .view .head .btn{
+    padding-right: 10px; padding-left: 10px;
+    width: calc( var(--bar-height) + 10px);
+    text-align: center;
+    line-height: var(--bar-height);
+}
+
+.container .plugin .view .head .btn:nth-child(2){
+    flex-grow: 1;
+}
+
+.container .plugin .view .body .plugin_list{
+    position: absolute;
+    top: 0; bottom: 0; left: 0; right: 0;
+    overflow-y: scroll;
+
+}
+
+.container .plugin .view .body .plugin_list .item{
+    --plugin-item-height:50px;
+    height: var(--plugin-item-height);
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: center;
+    line-height: var(--plugin-item-height);
+    font-size: calc(  var(--plugin-item-height) * 0.4 );
+    padding: 0 20px;
+}
+
+.container .plugin .view .body .plugin_list .item:not(:last-child){
+    border-bottom: 1px solid #232323;
+}
+
+.container .plugin .view .body .plugin_list .item .name{
+    padding: 0 20px;
+    overflow-x: hidden; white-space: nowrap; 
+    text-overflow: ellipsis;
+    flex-grow: 1;
+}
+
+.container .plugin .view .body .plugin_list .item *:not(.name){
+    flex-shrink: 0;
+}

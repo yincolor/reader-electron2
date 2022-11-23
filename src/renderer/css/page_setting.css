@@ -1,0 +1,44 @@
+/*关于软件页面*/
+.container .setting .view{
+    position: absolute;
+    height: 100%;width: 100%;
+}
+
+.container .setting .view .head {
+    position: absolute;
+    height: var(--bar-height);
+    width: 100%;
+    top: 0;
+    left: 0;
+    background-color: #AA7A7A;
+
+    display: flex;
+    justify-content: flex-start;
+}
+.container .setting .view .body {
+    position: absolute;
+    top: var(--bar-height);
+    bottom: 0;
+    width: 100%;
+    background-color: #fff;
+    overflow-y: scroll;
+    scrollbar-width: none;
+}
+
+.container .setting .view .body .btn{
+    min-height: var(--bar-height);
+    line-height: var(--bar-height);
+    padding-left: 10px;
+    border-bottom: 2px solid #000;
+}
+
+.container .setting .view .head .btn{
+    padding-right: 10px; padding-left: 10px;
+    width: calc( var(--bar-height) + 10px);
+    text-align: center;
+    line-height: var(--bar-height);
+}
+
+.container .setting .view .head .btn:nth-child(2){
+    flex-grow: 1;
+}

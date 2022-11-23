@@ -1,0 +1,75 @@
+/*主页*/
+.main .view{
+    position: absolute;
+    height: 100%;width: 100%;
+}
+
+.main .view .head {
+    position: absolute;
+    height: var(--bar-height);
+    width: 100%;
+    top: 0;
+    left: 0;
+    background-color: #AA7A7A;
+
+    display: flex;
+    justify-content: flex-end;
+}
+.main .view .body {
+    position: absolute;
+    top: var(--bar-height);
+    bottom: 0;
+    width: 100%;
+    background-color: #fff;
+}
+.main .view .foot {
+    position: absolute;
+    bottom: 0px;
+    height: var(--bar-height);
+    width: 100%;
+    background-color: #AA7A7A;
+
+    display: flex;
+    justify-content: center;
+}
+
+.main .view .foot .btn{
+    flex: auto;
+    text-align: center;
+    line-height: var(--bar-height);
+}
+
+.main .view .head .btn{
+    padding-right: 10px; padding-left: 10px;
+    /* width: var(--bar-height); */
+    text-align: center;
+    line-height: var(--bar-height);
+}
+
+.main .view .head .shelf_title_group .selected{
+    box-sizing: border-box;
+    border-bottom: 4px solid #ffaaaa;
+}
+
+
+/*书架*/
+.main .view .body .shelf{
+    position: absolute;
+    top: 0; bottom: 0; left: 0; right: 0;
+    overflow-y: scroll;
+}
+.main .view .body .shelf .book{
+    --book-item-height:50px;
+    height: var(--book-item-height);
+    padding: 0 20px;
+}
+
+.main .view .body .shelf .book:not(:last-child){
+    border-bottom: 1px solid #232323;
+}
+
+.main .view .body .shelf .book .name{
+    font-size: 16px;
+    line-height: var(--book-item-height) ;
+    margin: 0; padding: 0;
+}
