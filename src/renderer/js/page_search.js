@@ -25,9 +25,12 @@ const search = (function () {
                 const resStr = await local.request(url, 'GET', { header: null, body: null, encode: source.default.encoding });
                 /*解析书籍详情页面*/
                 const htmlDom = utils.str2html(resStr);
-                const info = __parseInfo(htmlDom, source);
+                const infoObj = __parseInfo(htmlDom, source);
+                console.log("书籍详情信息：", infoObj);
                 /*切换到书籍详情页面*/
-                
+                info.renderer(infoObj.name, infoObj.author,source.sourceName, source.sourceUrl,infoObj.latestChapter, infoObj.intro);
+                utils.gotoPage('info');
+
             }
             // console.log(e.target.classList);
         });
@@ -61,8 +64,8 @@ const search = (function () {
         const getIntroFunc = new Function('const html = arguments[0]; ' + info.intro);
         const getLatestChapterFunc = new Function('const html = arguments[0]; ' + info.latestChapter);
         const getTocUrlFunc = new Function('const html = arguments[0]; ' + info.tocUrl);
-        const name = getNameFunc(bookDom), author = getAuthorFunc(bookDom), intro = getIntroFunc(htmlDom), 
-            latestChapter = getLatestChapterFunc(bookDom), tocUrl = getTocUrlFunc(bookDom);
+        const name = getNameFunc(htmlDom), author = getAuthorFunc(htmlDom), intro = getIntroFunc(htmlDom), 
+            latestChapter = getLatestChapterFunc(htmlDom), tocUrl = getTocUrlFunc(htmlDom);
         return {name, author, intro, latestChapter, tocUrl};
     }
 
