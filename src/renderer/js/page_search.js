@@ -8,38 +8,70 @@ const search = (function () {
     const _searchBarInput = _head.getElementsByClassName('search-bar-input')[0];
     const _searchListDiv = _view.getElementsByClassName('search-list')[0];
 
-    function __createSearchItemElement(url, bookName, authorName, latestChapterName, sourceName) {
+    let _searchResList = []; /** 搜索结果列表，用于前台展示 */
 
-        const domStr = `<div class="item btn" url="${url} ">《<span>${bookName}</span>》, ${authorName}, ${latestChapterName}, ${sourceName}</div>`
+    function __createSearchItemElement(url, bookName, authorName, latestChapterName, sourceName, sourceUrl) {
+        const domStr = `<div class='item btn' url='${url}' source_url='${sourceUrl}' >《${bookName}》 <br>作者：${authorName} <br>最新章节：${latestChapterName} <br>书源名：${sourceName}</div>`
         const div = document.createElement('div');
         div.innerHTML = domStr;
         const itemDom = div.children[0]; /*生成节点元素*/
-        // const bookNameSpan = document.createElement('span');
-        // const authorNameSpan = document.createElement('span');
-        // const latestChapterNameSpan = document.createElement('span');
-        // const sourceNumSpan = document.createElement('span');
-        // div.classList.add('item', 'btn');
-        // bookNameSpan.innerText = bookName; authorNameSpan.innerText = authorName || "佚名";
-        // latestChapterNameSpan.innerText = latestChapterName || "无"; sourceNumSpan.innerText = sourceNum;
-        // div.innerHTML = "《" + bookNameSpan.outerHTML + "》  作者：" + authorNameSpan.outerHTML
-        //     + "  最新章节：" + latestChapterNameSpan.outerHTML + "  书源数量：" + sourceNumSpan.outerHTML;
+        itemDom.addEventListener('click', async (e)=>{
+            if(e.target.classList.contains('item')){
+                const url = e.target.getAttribute('url');
+                const sourceUrl = e.target.getAttribute('source_url');
+                /*请求书籍详情页面*/
+                let source = null;
+                for(const s of sourceManager.sourceList){ if(s.sourceUrl == sourceUrl){ source = s; } }
+                const resStr = await local.request(url, 'GET', { header: null, body: null, encode: source.default.encoding });
+                /*解析书籍详情页面*/
+                const htmlDom = utils.str2html(resStr);
+                const info = __parseInfo(htmlDom, source);
+                /*切换到书籍详情页面*/
+                
+            }
+            // console.log(e.target.classList);
+        });
         return itemDom;
     }
 
+    /** 排序搜索结果列表 */
+    function __sortSearchResList(){
+        _searchResList.sort((book1, book2) => {
+            const name1 = book1.name;
+            const name2 = book2.name;
+            const searchKey = book1.searchKey;
+            return name1.indexOf(searchKey) - name2.indexOf(searchKey)
+        });
+    }
 
     /** 制作搜索列表，并更新到界面上 */
-    function __rendererSearchTable(searchList) {
+    function __rendererSearchResList() {
         _searchListDiv.innerHTML = '';/*清空当前搜索列表*/
-        for (const s of searchList) {
-            const itemDom = __createSearchItemElement(s['url'], s['name'], s['author'], s['latestChapter'], s['sourceName']);
+        __sortSearchResList();
+        for (const s of _searchResList) {
+            const itemDom = __createSearchItemElement(s['href'], s['name'], s['author'], s['latestChapter'], s['sourceName'], s['sourceUrl']);
             _searchListDiv.append(itemDom);
         }
     }
 
+    function __parseInfo(htmlDom, source){
+        const info = source.info;
+        const getNameFunc = new Function('const html = arguments[0]; ' + info.name);
+        const getAuthorFunc = new Function('const html = arguments[0]; ' + info.author);
+        const getIntroFunc = new Function('const html = arguments[0]; ' + info.intro);
+        const getLatestChapterFunc = new Function('const html = arguments[0]; ' + info.latestChapter);
+        const getTocUrlFunc = new Function('const html = arguments[0]; ' + info.tocUrl);
+        const name = getNameFunc(bookDom), author = getAuthorFunc(bookDom), intro = getIntroFunc(htmlDom), 
+            latestChapter = getLatestChapterFunc(bookDom), tocUrl = getTocUrlFunc(bookDom);
+        return {name, author, intro, latestChapter, tocUrl};
+    }
 
 
     /** 负责解析请求到的搜索页面，将其转换为搜索结果的书籍列表 和 是否有下一页标志 */
-    function __parseSearch(htmlDom, search) {
+    function __parseSearch(htmlDom, source, searchKey) {
+        const search = source.search;
+        const sourceName = source.sourceName;
+        const sourceUrl = source.sourceUrl;
         const getListFunc = new Function('const html = arguments[0]; ' + search.list);
         const getAuthorFunc = new Function('const html = arguments[0]; ' + search.author);
         const getHrefFunc = new Function('const html = arguments[0]; ' + search.href);
@@ -52,7 +84,7 @@ const search = (function () {
         if (searchItems && searchItems.length > 0) {
             for (const bookDom of searchItems) {
                 const name = getNameFunc(bookDom), author = getAuthorFunc(bookDom), href = getHrefFunc(htmlDom), latestChapter = getLatestChapterFunc(bookDom);
-                searchBookList.push({ name, author, href, latestChapter });
+                searchBookList.push({ name, author, href, latestChapter, sourceName, sourceUrl, searchKey });
             }
         }
         const nextUrl = getNextUrlFunc(htmlDom);
@@ -62,9 +94,7 @@ const search = (function () {
 
     /** 请求并解析搜索页面，返回该书源的搜索列表 */
     async function __requestParseSearch(key, source) {
-        const search = source.search;
-        const requestRule = search.request;
-
+        const requestRule = source.search.request;
         const url = utils.formatStr(requestRule.url, { searchKey: key });
         let postBody = requestRule.postBody; /*POST请求需要BODY*/
         let requestType = requestRule.type || 'GET'; /*请求类型，默认GET*/
@@ -79,13 +109,13 @@ const search = (function () {
             postBody = JSON.parse(utils.formatStr(JSON.stringify(postBody), { searchKey: key }));
         }
         const encode = requestRule.encoding || 'utf-8';
-        const resStr = await local.request(url, requestType, { header: source.header, body: (postBody || null), encode: encode });
+        const resStr = await local.request(url, requestType, { header: source.default.header, body: (postBody || null), encode: encode });
         await utils.asleep(1000);
         const dom = utils.str2html(resStr); // parseHtml(resStr);
         let searchList = [];
         let nextUrl = null;
         try {
-            const ps = __parseSearch(dom, search);
+            const ps = __parseSearch(dom, source, key);
             searchList = ps.searchBookList;
             nextUrl = ps.nextUrl;
         } catch (err) {
@@ -109,7 +139,7 @@ const search = (function () {
         for (const source of sourceManager.sourceList) {
             console.log('[*search] 请求: ' + key + '，书源: ' + source.sourceName);
             const searchList = await __requestParseSearch(key, source);
-            console.log('get a search list:', searchList);
+            console.log('get a search list，list length is ', searchList.length);
             yield { searchList: searchList, source: source };
         }
         return 0;
@@ -120,13 +150,16 @@ const search = (function () {
         const searchKey = _searchBarInput.value;
         if (searchKey.length && searchKey.length > 0) {
             console.log('搜索按钮被点击', searchKey);
+            _searchResList = []; /*清空上一次搜索列表*/
             const searchYield = search(searchKey);
             /*循环发送请求*/
             while (true) {
                 const y = await searchYield.next();
                 if (y.done) { break; }
-                const val = y.value;
-                console.log("搜索结果：", val);
+                const __bookList = y.value.searchList;
+                _searchResList = _searchResList.concat(__bookList); /*将新获得的书籍列表并入搜索结果列表中*/
+                console.log("搜索结果：", __bookList);
+                __rendererSearchResList(); /*渲染搜索结果*/
             }
 
             /*处理返回网址*/
@@ -139,6 +172,8 @@ const search = (function () {
         utils.backPage();
     });
 
-    return {}
+    return {
+        getSearchList: ()=>{return _searchResList;}
+    }
 })();
 

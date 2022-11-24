@@ -1,10 +1,13 @@
 {
     "sourceName": "5200小说网",
     "sourceUrl": "http://www.ttwx.net",
-    "header":{
-        "User-Agent":"Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8", 
-        "Accept-Language": "zh-CN,zh;q=0.8,en-US;q=0.5,en;q=0.3"
+    "default":{
+        "header":{
+            "User-Agent":"Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8", 
+            "Accept-Language": "zh-CN,zh;q=0.8,en-US;q=0.5,en;q=0.3"
+        },
+        "encoding":"gbk"
     },
     "search":{
         "request":{
@@ -14,7 +17,7 @@
             "postBody":{}
         },
         "list":"return html.getElementsByClassName('bookbox'); ",
-        "href":"return html.getElementsByClassName('bookinfo')[0].getElementsByClassName('bookname')[0].getElementsByTagName('a')[0].href;",
+        "href":"return 'http://www.ttwx.net'+html.getElementsByClassName('bookinfo')[0].getElementsByClassName('bookname')[0].getElementsByTagName('a')[0].getAttribute('href');",
         "name":"return html.getElementsByClassName('bookinfo')[0].getElementsByClassName('bookname')[0].getElementsByTagName('a')[0].innerText;",
         "author":"return html.getElementsByClassName('bookinfo')[0].getElementsByClassName('author')[0].innerText.slice(3);",
         "latestChapter":"return html.getElementsByClassName('bookinfo')[0].getElementsByClassName('update')[0].getElementsByTagName('a')[0].innerText;",
@@ -30,7 +33,7 @@
     "toc":{
         "list":"return html.getElementsByClassName('listmain')[0].getElementsByTagName('dd');",
         "name":"return html.getElementsByTagName('a')[0].innerText;",
-        "href":"return html.getElementsByTagName('a')[0].href;",
+        "href":"return 'http://www.ttwx.net'+html.getElementsByTagName('a')[0].getAttribute('href');",
         "nextUrl":"return null;"
     },
     "content":{
