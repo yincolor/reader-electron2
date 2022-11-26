@@ -10,6 +10,7 @@ const search = (function () {
 
     let _searchResList = []; /** 搜索结果列表，用于前台展示 */
 
+    /** 生成搜索项元素 */
     function __createSearchItemElement(url, bookName, authorName, latestChapterName, sourceName, sourceUrl) {
         const domStr = `<div class='item btn' url='${url}' source_url='${sourceUrl}' >《${bookName}》 <br>作者：${authorName} <br>最新章节：${latestChapterName} <br>书源名：${sourceName}</div>`
         const div = document.createElement('div');
@@ -19,20 +20,12 @@ const search = (function () {
             if(e.target.classList.contains('item')){
                 const url = e.target.getAttribute('url');
                 const sourceUrl = e.target.getAttribute('source_url');
-                /*请求书籍详情页面*/
-                let source = null;
-                for(const s of sourceManager.sourceList){ if(s.sourceUrl == sourceUrl){ source = s; } }
-                const resStr = await local.request(url, 'GET', { header: null, body: null, encode: source.default.encoding });
-                /*解析书籍详情页面*/
-                const htmlDom = utils.str2html(resStr);
-                const infoObj = __parseInfo(htmlDom, source);
-                console.log("书籍详情信息：", infoObj);
-                /*切换到书籍详情页面*/
-                info.renderer(infoObj.name, infoObj.author,source.sourceName, source.sourceUrl,infoObj.latestChapter, infoObj.intro);
+                const infoObj = await __requestParseInfo(url, sourceUrl);
+                /*渲染，然后 切换到书籍详情页面*/
+                info.renderer(infoObj);
                 utils.gotoPage('info');
 
             }
-            // console.log(e.target.classList);
         });
         return itemDom;
     }
@@ -57,6 +50,7 @@ const search = (function () {
         }
     }
 
+    /** 解析书籍详情页面 */
     function __parseInfo(htmlDom, source){
         const info = source.info;
         const getNameFunc = new Function('const html = arguments[0]; ' + info.name);
@@ -66,7 +60,22 @@ const search = (function () {
         const getTocUrlFunc = new Function('const html = arguments[0]; ' + info.tocUrl);
         const name = getNameFunc(htmlDom), author = getAuthorFunc(htmlDom), intro = getIntroFunc(htmlDom), 
             latestChapter = getLatestChapterFunc(htmlDom), tocUrl = getTocUrlFunc(htmlDom);
-        return {name, author, intro, latestChapter, tocUrl};
+        const tocDom = ((tocUrl == 'LOCAL_URL')?htmlDom:null);
+        return {name, author, intro, latestChapter, tocUrl, tocDom};
+    }
+
+    /** 请求，然后解析详情页面 */
+    async function __requestParseInfo(_infoUrl, _sourceUrl){
+        /*请求书籍详情页面*/
+        let source = null;
+        for(const s of sourceManager.sourceList){ if(s.sourceUrl == _sourceUrl){ source = s; } }
+        const resStr = await local.request(_infoUrl, 'GET', { header: null, body: null, encode: source.default.encoding });
+        /*解析书籍详情页面*/
+        const htmlDom = utils.str2html(resStr);
+        const infoObj = __parseInfo(htmlDom, source);
+        infoObj.source = source;
+        console.log("书籍详情信息：", infoObj);
+        return infoObj;
     }
 
 
@@ -86,7 +95,7 @@ const search = (function () {
         const searchBookList = [];
         if (searchItems && searchItems.length > 0) {
             for (const bookDom of searchItems) {
-                const name = getNameFunc(bookDom), author = getAuthorFunc(bookDom), href = getHrefFunc(htmlDom), latestChapter = getLatestChapterFunc(bookDom);
+                const name = getNameFunc(bookDom), author = getAuthorFunc(bookDom), href = getHrefFunc(bookDom), latestChapter = getLatestChapterFunc(bookDom);
                 searchBookList.push({ name, author, href, latestChapter, sourceName, sourceUrl, searchKey });
             }
         }
@@ -176,7 +185,8 @@ const search = (function () {
     });
 
     return {
-        getSearchList: ()=>{return _searchResList;}
+        getSearchList: ()=>{return _searchResList;},
+        requestParseInfo: __requestParseInfo
     }
 })();
 

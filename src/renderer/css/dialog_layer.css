@@ -54,7 +54,7 @@
 
 /* 专门用来做菜单的一种弹窗 */
 .dialog_layer .menu .btn{
-    width: 200px;
+    width: auto;
     height: var(--bar-height);
     text-align: center;
     line-height: var(--bar-height);

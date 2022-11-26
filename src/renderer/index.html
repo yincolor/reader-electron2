@@ -157,9 +157,9 @@
                 <div class="body">
                     <div class="item"><span>名称：</span><span class="book_name">书籍名称</span></div>
                     <div class="item"><span>作者：</span><span class="book_author">作者名称</span></div>
-                    <div class="item btn_line"><span>书源：</span><span class="source_name">书源名称</span><div class="btn">更换书源</div></div>
+                    <div class="item btn_line"><span>书源：</span><span class="source_name">书源名称</span><div class="btn change_source">更换书源</div></div>
                     <!-- <div class="item btn_line"><span>分组：</span><span>分组名称</span><div class="btn">设置分组</div></div> -->
-                    <div class="item btn_line"><span>最新章节：</span><span class="book_latest_chapter">最新章节</span><div class="btn">查看目录</div></div>
+                    <div class="item btn_line"><span>最新章节：</span><span class="book_latest_chapter">最新章节</span><div class="btn show_toc">查看目录</div></div>
                     <div class="item"><span>简介：</span><span class="book_intro">书籍简介</span></div>
                 </div>
                 <div class="foot">
@@ -171,9 +171,9 @@
         <div class="page toc hide">
             <div class="view">
                 <div class="head">
-                    <div class="btn">🔙 返回</div>
+                    <div class="btn btn-back-page">🔙 返回</div>
                     <div class="btn">章节列表</div>
-                    <div class="btn"> 设置 </div>
+                    <div class="btn">  </div>
                 </div>
                 <div class="body">
                     <div class="btn"><span> 章节名称 1 </span><span>✔️</span></div>
@@ -280,7 +280,7 @@
             document.getElementById('loading_process').innerText = '页面更新成功：阅读<80%>';
             await plugin.init();  console.log("页面更新成功：书源");
             document.getElementById('loading_process').innerText = '页面更新成功：书源<100%>';
-            await utils.asleep(1000);
+            // await utils.asleep(1000);
             // 初始化结束，关闭loading dialog的遮挡
             utils.hideDialogLayer();
         })();
