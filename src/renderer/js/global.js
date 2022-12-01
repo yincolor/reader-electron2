@@ -1,6 +1,6 @@
 /** 处理页面事件 */
 
-// /** 通过给节点元素添加 hide class 使节点隐藏和显示 */
+/** 通过给节点元素添加 hide class 使节点隐藏和显示 */
 // function _hideDom(dom) { if (dom.classList.contains('hide') == false) { dom.classList.add('hide'); } }
 // function _displayDom(dom) { dom.classList.remove('hide'); }
 // function _changeDomHide(dom) {
@@ -130,6 +130,8 @@ const sourceManager = (function () {
     /*书源列表*/
     let __sourceList = [];
 
+
+
     /** 异步的初始化内容 */
     async function __init() {
         /** 初始化，全部的书源读取入内存 */
@@ -221,6 +223,9 @@ const sourceManager = (function () {
             return null;
         }
     }
+
+
+
     /** 更新书源 */
     async function __updateSource(url, newStr, _is_use = 1) {
         const s = __str2SourceObj(newStr); /*书源JSON文本转换为书源对象*/

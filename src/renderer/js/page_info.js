@@ -100,7 +100,7 @@ const info = (function(){
         const source = _infoObj.source;
         const tocDom = _infoObj.tocDom;
         const _tocObjList = await __requestParseToc(tocUrl, source, tocDom);
-        toc.renderer(_tocObjList);
+        toc.renderer(_tocObjList, source);
         utils.gotoPage('toc');
     });
 
@@ -120,9 +120,8 @@ const info = (function(){
         utils.showDialogLayer();
     });
 
-    _backBtn.addEventListener('click', (e) => {
-        utils.backPage();
-    });
+    /** 返回按钮点击事件 */
+    _backBtn.addEventListener('click', (e) => { utils.backPage(); });
 
     return {
         renderer:__rendererInfo,
