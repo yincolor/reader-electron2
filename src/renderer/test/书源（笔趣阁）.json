@@ -26,7 +26,7 @@
     "info":{
         "name":"return html.getElementsByClassName('info')[0].getElementsByTagName('h1')[0].innerText;",
         "author":"return html.getElementsByClassName('info')[0].getElementsByClassName('small')[0].getElementsByTagName('span')[0].innerText.slice(3);",
-        "intro":"return html.getElementsByClassName('intro')[0].getElementsByTagName('dd')[0].innerText;",
+        "intro":"return html.getElementsByClassName('intro')[0].getElementsByTagName('dd')[0].innerText.trim();",
         "latestChapter":"return html.getElementsByClassName('last')[1].getElementsByTagName('a')[0].innerText; ",
         "tocUrl": "return 'LOCAL_URL';"
     },

@@ -21,7 +21,7 @@ const toc = (function(){
                 console.log(e.currentTarget);
                 const url = _item.getAttribute('url');
                 const sourceUrl = _item.getAttribute('source_url');
-                console.log(url, sourceUrl);
+                console.log('点击章节：', url, sourceUrl);
                 let source = null;
                 for(const s of sourceManager.sourceList){
                     if(s.sourceUrl == sourceUrl){
@@ -29,7 +29,8 @@ const toc = (function(){
                     }
                 }
                 const _contentText = await __requestParseContent(url, source);
-                content.setText(_contentText);
+                /*在这里获取*/
+                content.renderer(_contentText, name, info.getCurrentInfo().name); /*渲染内容页面内容*/
                 utils.gotoPage('content');
             });
             _body.append(tocItem);

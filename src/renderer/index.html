@@ -152,7 +152,7 @@
                 <div class="head">
                     <div class="btn btn-back-page">🔙 返回</div>
                     <div class="btn"> 书籍信息 </div>
-                    <div class="btn">⚙️ 设置</div>
+                    <div class="btn add-shelf">⚙️ 放入书架</div>
                 </div>
                 <div class="body">
                     <div class="item"><span>名称：</span><span class="book_name">书籍名称</span></div>
@@ -160,11 +160,11 @@
                     <div class="item btn_line"><span>书源：</span><span class="source_name">书源名称</span><div class="btn change_source">更换书源</div></div>
                     <!-- <div class="item btn_line"><span>分组：</span><span>分组名称</span><div class="btn">设置分组</div></div> -->
                     <div class="item btn_line"><span>最新章节：</span><span class="book_latest_chapter">最新章节</span><div class="btn show_toc">查看目录</div></div>
-                    <div class="item"><span>简介：</span><span class="book_intro">书籍简介</span></div>
+                    <div class="item book_intro_container"><span>简介：</span><span class="book_intro">书籍简介</span></div>
                 </div>
                 <div class="foot">
-                    <div class="btn"> 删除 </div>
-                    <div class="btn"> 阅读 </div>
+                    <div class="btn download-book"> 缓存 </div>
+                    <div class="btn read-book"> 阅读 </div>
                 </div>
             </div>
         </div>
@@ -197,7 +197,7 @@
             <div class="view">
                 <div class="head hide">
                     <div class="btn btn-back-page">🔙 返回</div>
-                    <div class="btn"> 《都市之流氓老师》</div>
+                    <div class="btn"> <div class="book-name">《都市之流氓老师》</div><div class="toc-name">第一张结</div></div>
                     <div class="btn">⚙️ 设置</div>
                 </div>
                 <div class="body"><div class="text_content"></div></div>
@@ -276,9 +276,7 @@
             //初始化页面
             console.log('初始化各个页面');
             document.getElementById('loading_process').innerText = '初始化各个页面<60%>';
-            await content.init(); console.log("页面更新成功：阅读");
-            document.getElementById('loading_process').innerText = '页面更新成功：阅读<80%>';
-            await plugin.init();  console.log("页面更新成功：书源");
+            await utils.initPage();
             document.getElementById('loading_process').innerText = '页面更新成功：书源<100%>';
             // await utils.asleep(1000);
             // 初始化结束，关闭loading dialog的遮挡

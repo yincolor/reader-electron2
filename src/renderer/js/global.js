@@ -63,7 +63,7 @@ const utils = (function () {
         if (Object.keys(argMap).length == 0) { return str; }
         const argList = str.match(/\@{.*?}/g);
         console.log(str, argList);
-        if (argList) {    
+        if (argList) {
             for (const arg of argList) {
                 const k = arg.slice(2, -1);
                 str = str.replace(arg, argMap[k]);
@@ -105,6 +105,14 @@ const utils = (function () {
     function __str2html(str) {
         return (new DOMParser()).parseFromString(str, 'text/html');
     }
+     
+    /** 初始化页面，执行各个页面对象暴露的初始化的方法 */
+    async function __initPage() {
+        console.log('初始化各个页面');
+        await main.init();  console.log("页面更新成功：主页书架");
+        content.init();     console.log("页面更新成功：阅读");
+        await plugin.init(); console.log("页面更新成功：书源");
+    }
 
     return {
         histPages: __histPages,
@@ -119,6 +127,7 @@ const utils = (function () {
         asleep: __asleep,
         now: __now,
         log: __log,
+        initPage:__initPage,
     }
 })();
 
@@ -126,7 +135,7 @@ const utils = (function () {
 /** 书源管理，基于数据库db对象存储和管理书源数据 */
 const sourceManager = (function () {
     const _connection = db.connection;
-    const _t_source_data_name = db.meta_table.t_source_data.name;
+    const _t_source_data_name = db.getTable().t_source_data.name;
     /*书源列表*/
     let __sourceList = [];
 
@@ -224,8 +233,6 @@ const sourceManager = (function () {
         }
     }
 
-
-
     /** 更新书源 */
     async function __updateSource(url, newStr, _is_use = 1) {
         const s = __str2SourceObj(newStr); /*书源JSON文本转换为书源对象*/
@@ -310,5 +317,132 @@ const sourceManager = (function () {
         updateSourceUseState: __updateSourceUseState,
         /** 删除书源  */
         removeSource: __removeSource,
+        str2SourceObj:__str2SourceObj,
+    }
+})();
+
+/** 书架管理，基于数据库db对象存储和管理书架数据 */
+const shelfManager = (function () {
+    const _connection = db.connection;
+    const allTables = db.getTable();
+    const _t_shelf_data_name = allTables.t_shelf_data.name; /*书架表表名*/
+    const _t_toc_content_data_name = allTables.t_toc_content_data.name; /*章节表表名*/
+
+    async function __getBookInoByUrl(_bookUrl){
+        const results = await _connection.select({ from: _t_shelf_data_name, where: { url: _bookUrl } });
+        if(results && results.length && results.length > 0){
+            return results[0];
+        }else {
+            return null;
+        }
+    }
+
+    async function __getAllBook() {
+        const results = await _connection.select({ from: _t_shelf_data_name });
+        if (results.length > 0) {
+            console.log('查询书架成功，书架上的书籍数量：' + results.length);
+            return results;
+        } else {
+            console.log("查询书架失败，当前书架没有书或者数据库异常");
+            return [];
+        }
+    }
+
+    /** 添加书籍 */
+    async function __addBook(bookInfo) {
+        const bookName = bookInfo.name, bookUrl = bookInfo.url, sourceUrl = bookInfo.source.sourceUrl;
+        const intro = bookInfo.intro, authorName = bookInfo.author, latestChapterName = bookInfo.latestChapter;
+        const tocUrl = bookInfo.tocUrl;
+        const value = {
+            url: bookUrl,
+            name: bookName,
+            author: authorName,
+            intro: intro,
+            latest_chapter: latestChapterName,
+            toc_url: tocUrl,
+            source_url: sourceUrl
+        };
+        const noOfRowsInserted = await _connection.insert({ into: _t_shelf_data_name, values: [value] });
+        if (noOfRowsInserted > 0) {
+            return true;
+        } else {
+            console.log("新增书籍报错：插入新的数据失败");
+            return false;
+        }
+    }
+
+    /** 删除书籍 */
+    async function __removeBook(bookUrl) {
+        const rowsDeleted = await _connection.remove({
+            from: _t_shelf_data_name, where: { book_url: bookUrl }
+        });
+        return rowsDeleted;
+    }
+
+    /** 删除书籍下面所有章节 */
+    async function __removeBookAllToc(bookUrl) {
+        const rowsDeleted = await _connection.remove({
+            from: _t_toc_content_data_name, where: { book_url: bookUrl }
+        });
+        return rowsDeleted;
+    }
+
+    async function __addBookAllToc(bookUrl, tocObjList) {
+        const valueList = [];
+        let i = 0; /*章节序号，从0开始*/
+        for (const toc of tocObjList) {
+            const val = {
+                toc_index: i,
+                href: toc.href,
+                name: toc.name,
+                content: '',
+                book_url: bookUrl,
+                download_state: -1
+            };
+            valueList.push(val);
+            i++;
+        }
+        const noOfRowsInserted = await _connection.insert({ into: _t_toc_content_data_name, values: valueList });
+        if (noOfRowsInserted > 0) {
+            return true;
+        } else {
+            console.log("新增书籍章节报错：插入新的数据失败");
+            return false;
+        }
+    }
+
+    async function __setBookAllTocToDownload(bookUrl) {
+        const noOfRowsInserted = await _connection.update({
+            in: _t_toc_content_data_name,
+            set: { download_state: 0 },
+            where: { book_url: bookUrl }
+        });
+        if (noOfRowsInserted > 0) {
+            return noOfRowsInserted;
+        } else {
+            console.log("更新章节列表报错：更新了0行数据，可能是该书籍没有章节或章节表存在问题");
+            return -1;
+        }
+    }
+
+    async function __getTocListByBookUrl(bookUrl){
+        const tocList = await _connection.select({
+            from: _t_toc_content_data_name, 
+            where: { book_url: bookUrl },
+            order:{ by: 'toc_index', type: 'asc' }
+        });
+        return tocList;
+    }
+
+
+    return {
+        getBookInoByUrl: __getBookInoByUrl,
+        getAllBook: __getAllBook,
+        addBook: __addBook,
+        removeBook: __removeBook,
+        addBookAllToc: __addBookAllToc,
+        removeBookAllToc: __removeBookAllToc,
+        setBookAllTocToDownload: __setBookAllTocToDownload,
+        getTocListByBookUrl:__getTocListByBookUrl,
     }
 })();

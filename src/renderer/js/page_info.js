@@ -7,8 +7,11 @@ const info = (function(){
     const _foot = _view.getElementsByClassName('foot')[0];
 
     const _backBtn = _head.getElementsByClassName('btn-back-page')[0];
+    const _addShelfBtn = _head.getElementsByClassName('add-shelf')[0]; /*加入书架按钮*/
     const _changeSourceBtn = _body.getElementsByClassName('change_source')[0];
     const _showTocBtn = _body.getElementsByClassName('show_toc')[0];
+    const _downloadBtn = _foot.getElementsByClassName('download-book')[0];
+    const _readBtn = _foot.getElementsByClassName('read-book')[0];
 
     const _bookNameElement = _body.getElementsByClassName('book_name')[0];
     const _bookAuthorElement=_body.getElementsByClassName('book_author')[0];
@@ -33,7 +36,7 @@ const info = (function(){
         const infoObj = __getCurrentInfo();
         _bookNameElement.innerText = infoObj.name;
         _bookAuthorElement.innerText=infoObj.author;
-        _bookLatestChapterElement.innerText=infoObj.latestChapter;
+        _bookLatestChapterElement.innerText = infoObj.latestChapter || infoObj.latest_chapter;
         _bookIntroElement.innerText=infoObj.intro;
         _sourceNameElement.setAttribute('url', infoObj.source.sourceUrl);
         _sourceNameElement.innerText = infoObj.source.sourceName;
@@ -78,8 +81,11 @@ const info = (function(){
     }
 
     /** 请求，并解析章节列表页面 */
-    async function __requestParseToc(_tocUrl, _source, _tocPreDom = null){
+    async function __requestParseToc(_bookUrl, _tocUrl, _source, _tocPreDom = null){
         let tocDom = _tocPreDom;
+        if(_tocUrl == 'LOCAL_URL' && _tocPreDom == null){
+            _tocUrl = _bookUrl; 
+        }
         if(_tocUrl != 'LOCAL_URL'){
             /** 请求章节列表页面 */
             const resStr = await local.request(_tocUrl, 'GET', { header: _source.default.header, body: null, encode: _source.default.encoding });
@@ -88,7 +94,7 @@ const info = (function(){
         let [tocObjList, nextUrl] = parseToc(tocDom, _source);
         let nextUrlTocObjList = [];
         if(nextUrl){
-            nextUrlTocObjList = __requestParseToc(nextUrl, _source, null);
+            nextUrlTocObjList = __requestParseToc(_bookUrl, nextUrl, _source, null);
         }
         tocObjList = tocObjList.concat(nextUrlTocObjList);
         return tocObjList;
@@ -99,8 +105,19 @@ const info = (function(){
         const tocUrl = _infoObj.tocUrl;
         const source = _infoObj.source;
         const tocDom = _infoObj.tocDom;
-        const _tocObjList = await __requestParseToc(tocUrl, source, tocDom);
-        toc.renderer(_tocObjList, source);
+        const bookUrl = _infoObj.url;
+
+        const shelfBook = await shelfManager.getBookInoByUrl(bookUrl);
+        if(shelfBook){
+            /** 这个书籍信息是书架上的书，所以数据库里已经有留存章节列表 */
+            const _tocObjList = await shelfManager.getTocListByBookUrl(bookUrl);
+            console.log('章节列表：');
+            console.log(_tocObjList);
+            toc.renderer(_tocObjList, source);
+        }else {
+            const _tocObjList = await __requestParseToc(bookUrl, tocUrl, source, tocDom);
+            toc.renderer(_tocObjList, source);
+        }
         utils.gotoPage('toc');
     });
 
@@ -122,6 +139,51 @@ const info = (function(){
 
     /** 返回按钮点击事件 */
     _backBtn.addEventListener('click', (e) => { utils.backPage(); });
+
+    /** 加入书架按钮点击事件 */
+    _addShelfBtn.addEventListener('click', async (e)=>{
+        /*获取当前书籍详情*/
+        const _bookInfo = __getCurrentInfo();
+        const _infoUrl = _bookInfo.url; /*根据网址来判断是否存在*/
+        const shelfBooks = await shelfManager.getAllBook();
+        let haveThisBookInShelf = false;
+        for(const b of shelfBooks){
+            if(b['book_url'] == _infoUrl){
+                haveThisBookInShelf = true;
+            }
+        }
+        if(haveThisBookInShelf){
+            console.log('书架上已经有了这本书了，URL还一样');
+            return false;
+        }
+        await shelfManager.addBook(_bookInfo);
+        const _tocObjList = await __requestParseToc(_bookInfo.url, _bookInfo.tocUrl, _bookInfo.source, _bookInfo.tocDom); /章节列表，不包含内容/
+        await shelfManager.removeBookAllToc(_infoUrl);
+        await shelfManager.addBookAllToc(_infoUrl, _tocObjList); /*将章节列表存放章节表中，并且状态为未下载状态*/
+    });
+
+    _downloadBtn.addEventListener('click', async (e) => {
+        const _bookInfo = __getCurrentInfo();
+        const _bookUrl = _bookInfo.url; /*书籍网址*/
+        let haveThisBookInShelf = false;
+        for(const b of shelfBooks){
+            if(b['book_url'] == _bookUrl){
+                haveThisBookInShelf = true;
+            }
+        }
+        if(haveThisBookInShelf){
+            const tocNum = await shelfManager.setBookAllTocToDownload(_bookUrl);
+            console.log(`书架上已经有了这本书了，URL还一样，将书籍的章节(${tocNum}个)全部调整为等待下载状态`);
+            return true;
+        }else {
+            console.log('书架上还没有这本书，不能触发章节缓存');
+            return false;
+        }
+    });
+
+    _readBtn.addEventListener('click', async (e) =>{
+        console.log('开始阅读');
+    });
 
     return {
         renderer:__rendererInfo,

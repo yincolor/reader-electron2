@@ -17,20 +17,43 @@ const db = ( function(){
             source_json:{ notNull: true,    dataType: "string" }
         }
     };
+    const t_shelf_data = {
+        name: 't_shelf_data', 
+        columns: {
+            url: { primaryKey: true, dataType: "string" },
+            name:{ notNull: true,    dataType: "string" },
+            author:{ notNull: true,  dataType: "string" },
+            intro: { notNull: true,  dataType: "string" },
+            latest_chapter:{ notNull: true, dataType: "string" }, 
+            toc_url: { notNull: true, dataType: "string" }, 
+            source_url:{ notNull: true,dataType: "string" }
+        }
+    }
+    const t_toc_content_data = {
+        name: 't_toc_content_data', 
+        columns: {
+            toc_index: { notNull: true,    dataType: "number" }, /*章节列表的序号，非常必要！！*/
+            href: { primaryKey: true, dataType: "string" },
+            name:{ notNull: true,    dataType: "string" }, 
+            content: { notNull: true,    dataType: "string" },
+            book_url:{ notNull: true,    dataType: "string" },
+            download_state: { notNull: true,dataType: "number" } /** 下载状态：-1 未下载，没有下载需求 0 等待下载 1 下载成功 2 下载失败 3 正在下载 */
+        }
+    }
 
     /** 数据库元数据 */
     const meta_db  = {
         name: 'reader',
-        tables: [t_source_data]
+        tables: [t_source_data, t_shelf_data, t_toc_content_data]
     }
 
-    const meta_table = { 
-        t_source_data: t_source_data
-    }
+    // const meta_table = { 
+    //     t_source_data: t_source_data
+    // }
 
     const db = {
         meta_db: meta_db,
-        meta_table:meta_table,
+        // meta_table:meta_table,
         connection : new JsStore.Connection(),
         init: async function(){ 
             const isDbCreated = await this.connection.initDb(meta_db);
@@ -57,6 +80,14 @@ const db = ( function(){
                     resolve(false);
                 };
             });
+        },
+        getTable: ()=>{
+            const tables =  meta_db.tables;
+            const tableMap = {};
+            for(const t of tables){
+                tableMap[t.name] = t;
+            }
+            return tableMap;
         }
     };
 

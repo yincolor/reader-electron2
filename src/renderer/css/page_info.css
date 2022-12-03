@@ -52,6 +52,10 @@
     color: red;
 }
 
+.container .info .view .body .book_intro_container {
+    overflow-y: scroll;
+}
+
 .container .info .view .foot {
     position: absolute;
     bottom: 0px;

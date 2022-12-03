@@ -94,6 +94,9 @@ const content = (function () {
     const textContent = contentPage.getElementsByClassName('text_content')[0];
     const backBtn = contentHead.getElementsByClassName('btn-back-page')[0];
 
+    const bookNameDiv = contentHead.getElementsByClassName('book-name')[0];
+    const tocNameDiv = contentHead.getElementsByClassName('toc-name')[0];
+
     var __curPageIndex = 0; /*当前Content页面中文件翻到了第几页*/
     var __curPageNum = 0; /*当前页面的分页数量*/
 
@@ -112,7 +115,7 @@ const content = (function () {
     /** 切换到当前章节内容的第几页 */
     function __translateByIndex(pageIndex) {
         if (pageIndex >= __curPageNum) { console.error("翻页索引大于当前页面数"); return; }
-        console.log('翻页', pageIndex);
+        console.log('翻页:' + pageIndex + '/' + __curPageNum);
         textContent.style.transform = `translateX(calc( (-100% - var(--text-content-padding) * 2 ) * ${pageIndex} ))`;
     }
 
@@ -127,6 +130,19 @@ const content = (function () {
         textContent.innerHTML = _str;
         __resetContentMeta();
     }
+    function __setBookName(_str){
+        bookNameDiv.innerHTML = '《' + _str + '》';
+    }
+    function __setTocName(_str){
+        tocNameDiv.innerHTML = _str;
+    }
+
+    function __rendererContent(contentStr, tocName, bookName){
+        __setText(contentStr); 
+        __setBookName(bookName);
+        __setTocName(tocName);
+    }
+
 
 
     /** 向前翻页，如果当前为第0页，则 */
@@ -157,7 +173,21 @@ const content = (function () {
         console.log('window resize: ', window.innerWidth, window.innerHeight);
         /*更新curPageIndex和curPageNum，现在先暂定为重置为默认值然后重新计算*/
         __init();
-    })
+    });
+
+    /** 设置对内容页面显示和隐藏的监听 */
+    const class_option = { attributes: true, attributeFilter:['class'] };
+    const md = new MutationObserver( async (mutationRecord,observer) => {
+        // console.log(mutationRecord);
+        // console.log(observer);
+        const m0 = mutationRecord[0];
+        if(m0.target.classList.contains('hide') == false){
+            /*只有在进入内容页面的时候 才重加载内容*/
+            console.log('重新初始化内容页面：', m0.target);
+            __init();
+        }
+    });
+    md.observe( contentPage , class_option);
 
     /** 文本阅读界面事件 */
     contentBody.addEventListener('click', (e) => {
@@ -183,7 +213,7 @@ const content = (function () {
             state = '菜单';
         }
 
-        console.log('点击位置：', w_1_3, x, h_1_3, y, state);
+        // console.log('点击位置：', w_1_3, x, h_1_3, y, state);
         switch (state) {
             case '菜单': {
                 _changeDomHide(contentHead);
@@ -200,5 +230,8 @@ const content = (function () {
     return {
         init: __init, 
         setText:__setText,
+        setBookName:__setBookName,
+        setTocName: __setTocName,
+        renderer:__rendererContent
     }
 })();

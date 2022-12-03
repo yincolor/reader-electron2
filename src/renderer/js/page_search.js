@@ -24,7 +24,6 @@ const search = (function () {
                 /*渲染，然后 切换到书籍详情页面*/
                 info.renderer(infoObj);
                 utils.gotoPage('info');
-
             }
         });
         return itemDom;
@@ -74,7 +73,9 @@ const search = (function () {
         const htmlDom = utils.str2html(resStr);
         const infoObj = __parseInfo(htmlDom, source);
         infoObj.source = source;
+        infoObj.url = _infoUrl;
         console.log("书籍详情信息：", infoObj);
+
         return infoObj;
     }
 
