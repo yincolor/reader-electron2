@@ -4,6 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const request = require('./request.js');
 const config = require('./config.js');
+const opener = require('opener');
 console.log('[main.js] - 完成加载库' + (new Date()).toLocaleString());
 
 process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = true; /*阻止渲染进程弹出无用的安全警告*/
@@ -92,4 +93,8 @@ ipcMain.handle('get-chapter-content', async (e, args) => {
             if (err) { resolveFunc({ state: -2, text: null }); } else { resolveFunc({ state: 1, text: data }); }
         });
     });
+});
+ipcMain.handle('open-url-by-default-browser', async (e, args)=>{
+    const url = args.url;
+    opener(url);
 });

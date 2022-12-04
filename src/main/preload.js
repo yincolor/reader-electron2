@@ -21,6 +21,7 @@ contextBridge.exposeInMainWorld('local', {
         const res = await ipcRenderer.invoke('get-chapter-content', {bookName, chapterIndex});
         console.log('[getChapterContent]: ', res);
         return res;
-    }
+    },
+    openUrlByDefaultBrowser: async function (url){ await ipcRenderer.invoke('open-url-by-default-browser', {url}); }
 });
 

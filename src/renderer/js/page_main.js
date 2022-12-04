@@ -9,12 +9,15 @@ const main = (function(){
 
 
     /** 渲染书架 */
-    function __rendererBookShelf(bookList){
+    async function __rendererBookShelf(bookList){
         utils.log('main.init', '开始渲染书架，从书架管理器中得知，书架中有' + bookList.length + '本书');
         _shelf.innerHTML = '';
         const div = document.createElement('div');
         for(const book of bookList){
-            const domStr = `<div class="book btn" url='${book.url}'> <div class="name">《${book.name}》 作者：${book.author}</div></div>`;
+            console.log(book);
+            const read_toc_url = book.read_toc_url;
+            const toc = await shelfManager.getTocByTocUrl(read_toc_url);
+            const domStr = `<div class="book btn" url='${book.url}' source_url='${book.source_url}'> <div class="name">《${book.name}》<br>作者：${book.author}<br>正在阅读：${toc.name}</div></div>`;
             div.innerHTML = domStr;
             const itemDom = div.children[0]; /*生成节点元素*/
             itemDom.addEventListener('click', async (e) => {

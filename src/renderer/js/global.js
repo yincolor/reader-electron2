@@ -104,12 +104,12 @@ const utils = (function () {
     function __str2html(str) {
         return (new DOMParser()).parseFromString(str, 'text/html');
     }
-     
+
     /** 初始化页面，执行各个页面对象暴露的初始化的方法 */
     async function __initPage() {
         __log('utils.initPage', '开始初始化页面')
-        await main.init();  __log('utils.initPage', "页面更新成功：主页书架");
-        content.init();     __log('utils.initPage', "页面更新成功：阅读");
+        await main.init(); __log('utils.initPage', "页面更新成功：主页书架");
+        content.init(); __log('utils.initPage', "页面更新成功：阅读");
         await plugin.init(); __log('utils.initPage', "页面更新成功：书源");
     }
 
@@ -126,7 +126,7 @@ const utils = (function () {
         asleep: __asleep,
         now: __now,
         log: __log,
-        initPage:__initPage,
+        initPage: __initPage,
     }
 })();
 
@@ -207,13 +207,11 @@ const sourceManager = (function () {
     async function __getSourceByUrl(url) {
         const results = await _connection.select({
             from: _t_source_data_name,
-            where: {
-                source_url: url
-            },
+            where: { source_url: url },
             limit: 1
         });
         if (results.length > 0) {
-            console.log('查询书源：', results[0]);
+            utils.log('sourceManager.__getSourceByUrl', '查询书源'); console.log(results[0]);
             return results[0];
         } else {
             utils.log('sourceManager.getSourceByUrl', "查询书源失败：没有这个网站的书源。");
@@ -315,7 +313,7 @@ const sourceManager = (function () {
         updateSourceUseState: __updateSourceUseState,
         /** 删除书源  */
         removeSource: __removeSource,
-        str2SourceObj:__str2SourceObj,
+        str2SourceObj: __str2SourceObj,
     }
 })();
 
@@ -326,11 +324,11 @@ const shelfManager = (function () {
     const _t_shelf_data_name = allTables.t_shelf_data.name; /*书架表表名*/
     const _t_toc_content_data_name = allTables.t_toc_content_data.name; /*章节表表名*/
 
-    async function __getBookInoByUrl(_bookUrl){
+    async function __getBookInoByUrl(_bookUrl) {
         const results = await _connection.select({ from: _t_shelf_data_name, where: { url: _bookUrl } });
-        if(results && results.length && results.length > 0){
+        if (results && results.length && results.length > 0) {
             return results[0];
-        }else {
+        } else {
             return null;
         }
     }
@@ -350,7 +348,7 @@ const shelfManager = (function () {
     async function __addBook(bookInfo) {
         const bookName = bookInfo.name, bookUrl = bookInfo.url, sourceUrl = bookInfo.source.sourceUrl;
         const intro = bookInfo.intro, authorName = bookInfo.author, latestChapterName = bookInfo.latestChapter;
-        const tocUrl = bookInfo.tocUrl;
+        const tocUrl = bookInfo.tocUrl, read_toc_url = bookInfo.read_toc_url;
         const value = {
             url: bookUrl,
             name: bookName,
@@ -358,7 +356,8 @@ const shelfManager = (function () {
             intro: intro,
             latest_chapter: latestChapterName,
             toc_url: tocUrl,
-            source_url: sourceUrl
+            source_url: sourceUrl,
+            read_toc_url: read_toc_url,
         };
         const noOfRowsInserted = await _connection.insert({ into: _t_shelf_data_name, values: [value] });
         if (noOfRowsInserted > 0) {
@@ -408,7 +407,22 @@ const shelfManager = (function () {
             return false;
         }
     }
-     
+
+    /** 设置书籍正在读的章节网址 */
+    async function __setBookReadTocUrl(bookUrl, readTocUrl) {
+        const noOfRowsInserted = await _connection.update({
+            in: _t_shelf_data_name,
+            set: { read_toc_url: readTocUrl },
+            where: { url: bookUrl }
+        });
+        if (noOfRowsInserted > 0) {
+            return noOfRowsInserted;
+        } else {
+            console.log("更新书籍正在读的章节失败");
+            return -1;
+        }
+    }
+
     /** 设置当前书籍下的所有章节全都改为等待下载状态 */
     async function __setBookAllTocToDownload(bookUrl) {
         const noOfRowsInserted = await _connection.update({
@@ -425,17 +439,30 @@ const shelfManager = (function () {
     }
 
     /** 通过书籍网址获取章节列表 */
-    async function __getTocListByBookUrl(bookUrl){
+    async function __getTocListByBookUrl(bookUrl) {
         const tocList = await _connection.select({
-            from: _t_toc_content_data_name, 
+            from: _t_toc_content_data_name,
             where: { book_url: bookUrl },
-            order:{ by: 'toc_index', type: 'asc' }
+            order: { by: 'toc_index', type: 'asc' }
         });
         return tocList;
     }
 
+    /** 通过章节内容网址获取章节项 */
+    async function __getTocByTocUrl(tocUrl) {
+        const tocList = await _connection.select({
+            from: _t_toc_content_data_name,
+            where: { href: tocUrl }
+        });
+        if (tocList && tocList.length && tocList.length > 0) {
+            return tocList[0];
+        } else {
+            return null;
+        }
+    }
+
     /** 根据网址查找并更新章节对应内容 */
-    async function __setContentByUrl(_url, _content){
+    async function __setContentByUrl(_url, _content) {
         const noOfRowsInserted = await _connection.update({
             in: _t_toc_content_data_name,
             set: { content: _content },
@@ -449,7 +476,7 @@ const shelfManager = (function () {
         }
     }
     /** 根据网址查找并更新章节对应的下载状态 */
-    async function __setTocDownloadStateByUrl(_url, _downloadState){
+    async function __setTocDownloadStateByUrl(_url, _downloadState) {
         const noOfRowsInserted = await _connection.update({
             in: _t_toc_content_data_name,
             set: { download_state: _downloadState },
@@ -472,38 +499,48 @@ const shelfManager = (function () {
         addBookAllToc: __addBookAllToc,
         removeBookAllToc: __removeBookAllToc,
         setBookAllTocToDownload: __setBookAllTocToDownload,
-        getTocListByBookUrl:__getTocListByBookUrl,
-        setContentByUrl:__setContentByUrl,
-        setTocDownloadStateByUrl:__setTocDownloadStateByUrl
+        getTocListByBookUrl: __getTocListByBookUrl,
+        getTocByTocUrl: __getTocByTocUrl,
+        setContentByUrl: __setContentByUrl,
+        setTocDownloadStateByUrl: __setTocDownloadStateByUrl,
+        setBookReadTocUrl: __setBookReadTocUrl,
     }
 })();
 
-const downloadManager = (function(){
+const downloadManager = (function () {
     const _connection = db.connection;
     const allTables = db.getTable();
-    const _t_shelf_data_name = allTables.t_shelf_data.name; /*书架表表名*/
     const _t_toc_content_data_name = allTables.t_toc_content_data.name; /*章节表表名*/
 
     let _downloadWaitQueue = [];
 
+    function __getDownloadWaitQueue() {
+        return _downloadWaitQueue;
+    }
+
     /** 刷新下载列表，相当于获取在当前时刻等待下载状态的章节，然后给等待下载队列赋值 */
-    async function __freshDownloadWaitQueue(){
+    async function __freshDownloadWaitQueue() {
         _downloadWaitQueue = await __getHaveDownloadToc();
     }
 
-    async function __downloadOnce(){
-        if(_downloadWaitQueue.length > 0){
+    async function __downloadOnce() {
+        if (_downloadWaitQueue.length > 0) {
             const tocItem = _downloadWaitQueue.shift();
             const source = await __getSourceByTocObj(tocItem);
             const _href = tocItem.href;
-            const _content = await toc.requestParseContent(_href, source);
-            await shelfManager.setContentByUrl(_href, _content);
-            await shelfManager.setTocDownloadStateByUrl(_href, 1);
-            utils.log('downloadManager','下载完毕：' + _href);
+            const _content = (await toc.requestParseContent(_href, source));
+            if (_content) {
+                await shelfManager.setContentByUrl(_href, _content);
+                await shelfManager.setTocDownloadStateByUrl(_href, 1);
+                utils.log('downloadManager', '下载完毕：' + _href);
+            }else {
+                await shelfManager.setTocDownloadStateByUrl(_href, 2);
+                utils.log('downloadManager', '下载失败：' + _href);
+            }
         }
     }
 
-    async function __init(){
+    async function __init() {
         __freshDownloadWaitQueue();
         setInterval(() => {
             __downloadOnce();
@@ -511,17 +548,17 @@ const downloadManager = (function(){
     }
 
     /** 获取当前toc列表中处于等待下载状态的章节项 */
-    async function __getHaveDownloadToc(){
-        return await _connection.select({ from: _t_toc_content_data_name, where: {download_state: 0} });
+    async function __getHaveDownloadToc() {
+        return await _connection.select({ from: _t_toc_content_data_name, where: { download_state: 0 } });
     }
 
     /** 根据章节项获取归属的书源 */
-    async function __getSourceByTocObj(tocObj){
+    async function __getSourceByTocObj(tocObj) {
         const bookUrl = tocObj.book_url;
         const bookObj = await shelfManager.getBookInoByUrl(bookUrl);
         const sourceUrl = bookObj.source_url;
         const sourceObj = await sourceManager.getSourceByUrl(sourceUrl);
-        if(sourceObj){
+        if (sourceObj) {
             const source = sourceManager.str2SourceObj(sourceObj.source_json);
             return source;
         }
@@ -530,6 +567,7 @@ const downloadManager = (function(){
 
 
     return {
-        init:__init
+        init: __init,
+        getDownloadWaitQueue: __getDownloadWaitQueue,
     }
 })();

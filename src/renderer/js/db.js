@@ -26,7 +26,8 @@ const db = ( function(){
             intro: { notNull: true,  dataType: "string" },
             latest_chapter:{ notNull: true, dataType: "string" }, 
             toc_url: { notNull: true, dataType: "string" }, 
-            source_url:{ notNull: true,dataType: "string" }
+            source_url:{ notNull: true,dataType: "string" },
+            read_toc_url:{dataType:"string"}
         }
     }
     const t_toc_content_data = {

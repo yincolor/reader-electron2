@@ -60,7 +60,7 @@
 }
 .main .view .body .shelf .book{
     --book-item-height:50px;
-    height: var(--book-item-height);
+    min-height: var(--book-item-height);
     padding: 0 20px;
 }
 

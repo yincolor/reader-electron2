@@ -67,34 +67,7 @@
                 </div>
                 <div class="body">
                     <div class="search-list">
-                        <div class="item btn">搜索结果1</div>
-                        <div class="item btn">搜索结果1</div>
-                        <div class="item btn">搜索结果1</div>
-                        <div class="item btn">搜索结果1</div>
-                        <div class="item btn">搜索结果1</div>
-                        <div class="item btn">搜索结果1</div>
-                        <div class="item btn">搜索结果1</div>
-                        <div class="item btn">搜索结果1</div>
-                        <div class="item btn">搜索结果1</div>
-                        <div class="item btn">搜索结果1</div>
-                        <div class="item btn">搜索结果1</div>
-                        <div class="item btn">搜索结果1</div>
-                        <div class="item btn">搜索结果1</div>
-                        <div class="item btn">搜索结果1</div>
-                        <div class="item btn">搜索结果1</div>
-                        <div class="item btn">搜索结果1</div>
-                        <div class="item btn">搜索结果1</div>
-                        <div class="item btn">搜索结果1</div>
-                        <div class="item btn">搜索结果1</div>
-                        <div class="item btn">搜索结果1</div>
-                        <div class="item btn">搜索结果1</div>
-                        <div class="item btn">搜索结果1</div>
-                        <div class="item btn">搜索结果1</div>
-                        <div class="item btn">搜索结果1</div>
-                        <div class="item btn">搜索结果1</div>
-                        <div class="item btn">搜索结果1</div>
-                        <div class="item btn">搜索结果1</div>
-                        <div class="item btn">搜索结果1</div>
+                        <div class="item btn">尚无搜索结果</div>
                     </div>
                 </div>
             </div>
@@ -131,19 +104,18 @@
         <div class="page about hide">
             <div class="view">
                 <div class="head">
-                    <div class="btn">🔙 返回</div>
+                    <div class="btn btn-back-page">🔙 返回</div>
                     <div class="btn">关于</div>
-                    <div class="btn">🔗 分享</div>
+                    <div class="btn btn-share-application">🔗 分享</div>
                 </div>
                 <div class="body">
                     <div class="btn">软件介绍：这是一款使用Electron开发的开源阅读软件。</div>
                     <div class="btn">开发人员：ty</div>
-                    <div class="btn">更新日志：(version 0.0.1)</div>
-                    <div class="btn">联系邮件：xxxxxx@123.com</div>
-                    <div class="btn">联系 QQ ：xxxxxxxxxxx</div>
-                    <div class="btn">开源地址：https://github.com/ty/xxxxx</div>
+                    <div class="btn">更新日志：开发基本完成，可以使用了(version 2.0.2)</div>
+                    <div class="btn">联系方式：无</div>
+                    <div class="btn">开源地址：https://github.com/yincolor/reader-electron2</div>
                     <div class="btn">开源协议：第三版本GPL开源协议</div>
-                    <div class="btn">免责声明</div>
+                    <div class="btn">额外声明：<br>（1）开发此工具仅为学习参考之目的，很难对其可用性、准确性做出任何承诺或保证。<br>（2）用户使用此工具请符合当地法律法规要求，不得使用此工具施行违法犯罪活动，作者不承担任何法律责任。<br>（3）此工具不会给作者带来任何收益，请不要为此工具付任何钱。</div>
                 </div>
             </div>
         </div>
@@ -219,11 +191,11 @@
                 </div>
                 <div class="body">
                     <div class="btn source-plugin">书源配置</div>
-                    <div class="btn">替换净化</div>
-                    <div class="btn">预下载章节</div>
-                    <div class="btn">默认用户代理</div>
-                    <div class="btn">记录日志（关闭）</div>
-                    <div class="btn">关于</div>
+                    <!-- <div class="btn">替换净化</div> -->
+                    <!-- <div class="btn">预下载章节</div> -->
+                    <!-- <div class="btn">默认用户代理</div> -->
+                    <!-- <div class="btn">记录日志（关闭）</div> -->
+                    <div class="btn about">关于</div>
                 </div>
             </div>
         </div>
@@ -262,6 +234,7 @@
     <script src="./js/page_content.js"></script>
     <script src="./js/page_setting.js"></script>
     <script src="./js/page_plugin.js"></script>
+    <script src="./js/page_about.js"></script>
     
     <script process>
         /** 流程管理，执行初始化数据库、页面等操作，在初始化结束后屏蔽loading弹窗，显示主页，让用户开始操作 */
@@ -287,22 +260,6 @@
         
     </script>
 
-    <script src="./js/test.js"></script>
-    <script test>
-        // content.setText(test.novel);
-
-        /*test*/
-        async function testGet(chapterIndex){
-            const val = await electronAPI.getChapterContent('book', chapterIndex);
-            console.log('get res: ', val);
-        }
-
-        async function testSave(chapterIndex){
-            const val = await electronAPI.saveChapterContent('book', chapterIndex, 'asdasdasd'+chapterIndex);
-            console.log('save res: ', val);
-        }
-
-    </script>
 </script_box>
 
 </html>

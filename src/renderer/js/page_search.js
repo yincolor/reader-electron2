@@ -74,7 +74,7 @@ const search = (function () {
         const infoObj = __parseInfo(htmlDom, source);
         infoObj.source = source;
         infoObj.url = _infoUrl;
-        console.log("书籍详情信息：", infoObj);
+        utils.log('search.__requestParseInfo', "书籍详情信息：", JSON.stringify(infoObj));
 
         return infoObj;
     }
@@ -115,7 +115,7 @@ const search = (function () {
         if(requestType.constructor && requestType.constructor == String){
             requestType = requestType.toUpperCase(); 
         }else{
-            console.log('requestType 不是 字符串类型，返回空数组');
+            // 'requestType 不是 字符串类型，返回空数组
             return []; 
         }
         if (requestType == 'POST') {
@@ -132,7 +132,7 @@ const search = (function () {
             searchList = ps.searchBookList;
             nextUrl = ps.nextUrl;
         } catch (err) {
-            console.log('解析搜索DOM失败，[' + source.sourceName + ":" + source.sourceUrl + ']书源出错，返回空数组.');
+            utils.log('search.__requestParseSearch', '解析搜索DOM失败，[' + source.sourceName + ":" + source.sourceUrl + ']书源出错，返回空数组');
             return [];
         }
         if (nextUrl) {
@@ -150,9 +150,9 @@ const search = (function () {
     /** 获取生效的书源插件，循环请求书源列表 */
     async function* search(key) {
         for (const source of sourceManager.sourceList) {
-            console.log('[*search] 请求: ' + key + '，书源: ' + source.sourceName);
+            utils.log('search.*search', '请求: ' + key + '，书源: ' + source.sourceName);
             const searchList = await __requestParseSearch(key, source);
-            console.log('get a search list，list length is ', searchList.length);
+            utils.log('search.*search', '获取到一个搜索列表，长度：' + searchList.length);
             yield { searchList: searchList, source: source };
         }
         return 0;
@@ -162,7 +162,7 @@ const search = (function () {
     _searchBtn.addEventListener('click', async (e) => {
         const searchKey = _searchBarInput.value;
         if (searchKey.length && searchKey.length > 0) {
-            console.log('搜索按钮被点击', searchKey);
+            utils.log('search._searchBtn.点击事件', '开始搜索' + searchKey);
             _searchResList = []; /*清空上一次搜索列表*/
             const searchYield = search(searchKey);
             /*循环发送请求*/
@@ -171,13 +171,12 @@ const search = (function () {
                 if (y.done) { break; }
                 const __bookList = y.value.searchList;
                 _searchResList = _searchResList.concat(__bookList); /*将新获得的书籍列表并入搜索结果列表中*/
-                console.log("搜索结果：", __bookList);
                 __rendererSearchResList(); /*渲染搜索结果*/
             }
 
             /*处理返回网址*/
         } else {
-            console.log('搜索输入框没有内容，停止搜索，请检查');
+            utils.log('_searchBtn.点击事件', '搜索输入框没有内容，停止搜索，请检查');
         }
     });
 
