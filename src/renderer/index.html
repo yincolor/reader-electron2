@@ -266,20 +266,22 @@
     <script process>
         /** 流程管理，执行初始化数据库、页面等操作，在初始化结束后屏蔽loading弹窗，显示主页，让用户开始操作 */
         (async function processManager(){
+            utils.log('INDEX.HTML', '执行初始化流程');
             //初始化数据库，获得全局变量 db
             document.getElementById('loading_process').innerText = '0%';
+            utils.log('INDEX.HTML', '初始化数据库');
             await db.init();
             document.getElementById('loading_process').innerText = '初始化数据库<20%>';
             //初始化管理器
+            utils.log('INDEX.HTML', '初始化书源管理器');
             await sourceManager.init();
+            await downloadManager.init();
             document.getElementById('loading_process').innerText = '初始化管理器<40%>';
             //初始化页面
-            console.log('初始化各个页面');
-            document.getElementById('loading_process').innerText = '初始化各个页面<60%>';
+            utils.log('INDEX.HTML', '执行各个页面init方法');
             await utils.initPage();
-            document.getElementById('loading_process').innerText = '页面更新成功：书源<100%>';
-            // await utils.asleep(1000);
             // 初始化结束，关闭loading dialog的遮挡
+            utils.log('INDEX.HTML', '初始化流程完毕');
             utils.hideDialogLayer();
         })();
         

@@ -1,11 +1,12 @@
+console.log('[main.js] - 开始执行main.js脚本 ' + (new Date()).toLocaleString());
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const fs = require('fs');
-const os = require('os');
 const request = require('./request.js');
 const config = require('./config.js');
-const { resolve } = require('path');
+console.log('[main.js] - 完成加载库' + (new Date()).toLocaleString());
 
+process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = true; /*阻止渲染进程弹出无用的安全警告*/
 
 /**
  * 主窗口对象
@@ -15,7 +16,7 @@ let mainWindow = null;
 
 function createWindow() {
     mainWindow = new BrowserWindow({
-        width: 1200, height: 900,
+        width: 1400, height: 700,
         webPreferences: {
             preload: path.join(__dirname, './preload.js'),
             devTools: true,
@@ -40,9 +41,11 @@ function init() {
 }
 
 app.whenReady().then(() => {
+    console.log('[main.js] - 后台准备完毕，开始创建窗口' + (new Date()).toLocaleString());
     init();
     createWindow();
     app.on('activate', () => { if (BrowserWindow.getAllWindows().length == 0) { createWindow(); } });
+    console.log('[main.js] - 窗口创建完毕' + (new Date()).toLocaleString());
 });
 
 app.on('window-all-closed', () => {

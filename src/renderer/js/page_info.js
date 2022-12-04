@@ -1,4 +1,3 @@
-
 const info = (function(){
     const _infoPage = document.getElementsByClassName('page info')[0];
     const _view = _infoPage.getElementsByClassName('view')[0];
@@ -165,9 +164,11 @@ const info = (function(){
     _downloadBtn.addEventListener('click', async (e) => {
         const _bookInfo = __getCurrentInfo();
         const _bookUrl = _bookInfo.url; /*书籍网址*/
+        const shelfBooks = await shelfManager.getAllBook();
         let haveThisBookInShelf = false;
         for(const b of shelfBooks){
-            if(b['book_url'] == _bookUrl){
+            console.log(b);
+            if(b['url'] == _bookUrl){
                 haveThisBookInShelf = true;
             }
         }

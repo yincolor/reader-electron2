@@ -13,7 +13,8 @@ const toc = (function(){
         for(const toc of tocList){
             const name = toc.name;
             const href = toc.href;
-            const tocItemHtmlStr = `<div class="btn" url='${href}' source_url='${source.sourceUrl}' source_name='${source.sourceName}' ><span>${name}</span><span>✔️</span></div>`;
+            const downloadState = toc.download_state; /* 下载状态 */
+            const tocItemHtmlStr = `<div class="btn" url='${href}' source_url='${source.sourceUrl}' source_name='${source.sourceName}' ><span>${name}</span><span>${downloadState}</span></div>`;
             const tocItem = domParse.parseFromString(tocItemHtmlStr,'text/html').body.children[0];
             tocItem.addEventListener('click', async (e)=>{
                 /*点击章节列表项*/
@@ -65,6 +66,7 @@ const toc = (function(){
     _backBtn.addEventListener('click', (e)=>{ utils.backPage(); });
 
     return {
-        renderer: __rendererToc
+        renderer: __rendererToc,
+        requestParseContent: __requestParseContent
     }
 })();
