@@ -6,11 +6,12 @@ const info = (function () {
     const _foot = _view.getElementsByClassName('foot')[0];
 
     const _backBtn = _head.getElementsByClassName('btn-back-page')[0];
-    const _addShelfBtn = _head.getElementsByClassName('add-shelf')[0]; /*加入书架按钮*/
+    const _addShelfBtn = _foot.getElementsByClassName('add-shelf')[0]; /*加入书架按钮*/
     const _changeSourceBtn = _body.getElementsByClassName('change_source')[0];
     const _showTocBtn = _body.getElementsByClassName('show_toc')[0];
     const _downloadBtn = _foot.getElementsByClassName('download-book')[0];
     const _readBtn = _foot.getElementsByClassName('read-book')[0];
+    const _deleteBookBtn = _head.getElementsByClassName('delete-from-shelf')[0];
 
     const _bookNameElement = _body.getElementsByClassName('book_name')[0];
     const _bookAuthorElement = _body.getElementsByClassName('book_author')[0];
@@ -43,8 +44,11 @@ const info = (function () {
     async function __setCurInfoReadTocUrl(tocUrl) {
         __curInfo.read_toc_url = tocUrl;
         const bookUrl = __getCurrentInfo().url;
-        await shelfManager.setBookReadTocUrl(bookUrl, tocUrl);
+        await shelfManager.setBookReadTocUrl(bookUrl, tocUrl); 
+        /** 将toc页面的read */
+        // toc.freshViewReadingToc(tocUrl);
     }
+
     /** 读取当前书籍详情页正在读的书籍的正在读的章节网址 */
     function __getCurInfoReadTocUrl() {
         return __curInfo ? __curInfo.read_toc_url : null;
@@ -130,6 +134,7 @@ const info = (function () {
         const source = _infoObj.source;
         const _tocObjList = await __getCurBookInfoOfTocList();
         toc.renderer(_tocObjList, source);
+        // toc.freshViewReadingToc(__getCurInfoReadTocUrl());
         utils.gotoPage('toc');
     });
 
@@ -159,12 +164,13 @@ const info = (function () {
         const shelfBooks = await shelfManager.getAllBook();
         let haveThisBookInShelf = false;
         for (const b of shelfBooks) {
-            if (b['book_url'] == _infoUrl) {
+            if (b['url'] == _infoUrl) {
                 haveThisBookInShelf = true;
             }
         }
         if (haveThisBookInShelf) {
             utils.log('info._addShelfBtn.点击事件', '书架上已经有了这本书了，URL还一样，无需重复加入书架');
+            alert('书架上已经有了这本书了，URL还一样，无需重复加入书架');
             return false;
         }
         const _tocObjList = await __requestParseToc(_bookInfo.url, _bookInfo.tocUrl, _bookInfo.source, _bookInfo.tocDom); /章节列表，不包含内容/
@@ -198,6 +204,7 @@ const info = (function () {
             return true;
         } else {
             utils.log('info._downloadBtn.点击事件', '书架上还没有这本书，不能触发章节缓存');
+            alert('书架上还没有这本书，不能触发章节缓存，请先将书籍放入书架');
             return false;
         }
     });
@@ -219,8 +226,25 @@ const info = (function () {
         const readTocName = (()=>{ for(const toc of _tocObjList){ if(toc.href == readTocUrl){ return toc.name; } }return '未获取章节名'; })();
         toc.renderer(_tocObjList, bookInfo.source);
         const _contentText = await toc.getContentByTocUrl(readTocUrl, bookInfo.source.sourceUrl); 
+        // toc.freshViewReadingToc(readTocUrl);
         content.renderer(_contentText, readTocName, bookInfo.name);
         utils.gotoPage('content');
+    });
+
+    _deleteBookBtn.addEventListener('click', async ()=>{
+        const _bookUrl = info.getCurrentInfo().url;
+        const shelfBooks = await shelfManager.getAllBook();
+        let haveThisBookInShelf = false;
+        for (const b of shelfBooks) {
+            console.log(b);
+            if (b['url'] == _bookUrl) {
+                haveThisBookInShelf = true;
+            }
+        }
+        if(haveThisBookInShelf){
+            await shelfManager.deleteBookFromShelf(_bookUrl);
+            alert("书架上的书籍已被删除：" + _bookUrl);
+        }
     });
 
     return {

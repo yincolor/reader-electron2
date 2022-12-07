@@ -11,6 +11,11 @@ const content = (function () {
     const bookNameDiv = contentHead.getElementsByClassName('book-name')[0];
     const tocNameDiv = contentHead.getElementsByClassName('toc-name')[0];
 
+    const _prevTocBtn = contentFoot.getElementsByClassName('btn_prev_toc')[0];
+    const _nextTocBtn = contentFoot.getElementsByClassName('btn_next_toc')[0];
+    const _tocPageBtn = contentFoot.getElementsByClassName('btn_toc_page')[0];
+    const _contentSettingBtn = contentFoot.getElementsByClassName('btn_setting')[0];
+
     var __curPageIndex = 0; /*当前Content页面中文件翻到了第几页*/
     var __curPageNum = 0; /*当前页面的分页数量*/
 
@@ -60,18 +65,34 @@ const content = (function () {
 
 
 
-    /** 向前翻页，如果当前为第0页，则 */
+    /** 向前翻页，如果当前为第0页，则那么新页数会和旧的页数相同，那么返回1,表示该向前翻章节了 */
     function __pageForward() {
         // console.log('pageForward: ' + this.curPageIndex + ' -> ' + (this.curPageIndex - 1));
         const curPageIndexOld = __getCurPageIndex();
         const curPageIndexNew = curPageIndexOld - 1 < 0 ? 0 : curPageIndexOld - 1;
         __setCurPageIndex(curPageIndexNew);
+        if(curPageIndexOld == curPageIndexNew){
+            return 1;
+        }else {
+            return -1;
+        }
     }
-    /** 向后翻页 */
+    /** 向后翻页 如果点击最后一页，那么新页数会和旧的页数相同，那么返回1,表示该向后翻章节了 */
     function __pageBackward() {
         // console.log('pageBackward: ' + this.curPageIndex + ' -> ' + (this.curPageIndex + 1));
         const curPageIndexOld = __getCurPageIndex();
         const curPageIndexNew = curPageIndexOld + 1 >= __curPageNum ? curPageIndexOld : curPageIndexOld + 1;
+        __setCurPageIndex(curPageIndexNew);
+        if(curPageIndexOld == curPageIndexNew){
+            return 1;
+        }else {
+            return -1;
+        }
+    }
+
+    /** 翻向当前章节最后一页 */
+    function __pageBackwardToEnd(){
+        const curPageIndexNew = __curPageNum - 1;
         __setCurPageIndex(curPageIndexNew);
     }
 
@@ -105,7 +126,7 @@ const content = (function () {
     md.observe( contentPage , class_option);
 
     /** 文本阅读界面事件 */
-    contentBody.addEventListener('click', (e) => {
+    contentBody.addEventListener('click', async (e) => {
         const rect = contentBody.getBoundingClientRect();
         const x = e.pageX - rect.left, y = e.pageY - rect.top, width = rect.width, height = rect.height; /*鼠标在contentBody节点中点击的位置，contentBody的宽高*/
         const w_1_3 = width / 3, w_2_3 = width * 2 / 3; /*将界面分成9个方块，中间“菜单”，左“上一页”，右“下一页”，中上“上一页”，中下“下一页”*/
@@ -135,10 +156,56 @@ const content = (function () {
                 _changeDomHide(contentFoot);
                 break;
             }
-            case '上一页': { __pageForward(); break; }
-            case '下一页': { __pageBackward(); break; }
+            case '上一页': { 
+                const state = __pageForward();
+                if(state == 1){
+                    await __gotoPrevToc();
+                    __pageBackwardToEnd();
+                }
+                break; 
+            }
+            case '下一页': { 
+                const state = __pageBackward(); 
+                if(state == 1){
+                    _nextTocBtn.click();
+                }
+                break; 
+            }
+        }
+    }); 
+
+    /** 切换到前一个章节，并且重置内容页面 */
+    async function __gotoPrevToc(){
+        const __curReadTocUrl = info.getCurInfoReadTocUrl();
+        const _prevUrl = toc.getPrevTocUrl(__curReadTocUrl);
+        if(_prevUrl){
+            const _text = await toc.getContentByTocUrl(_prevUrl, info.getCurrentInfo().source.sourceUrl);
+            const tocName = toc.getTocNameByUrl(_prevUrl);
+            await toc.setContent(_text, tocName, info.getCurrentInfo().name, _prevUrl);
+            __init();
+        }
+    }
+
+    _prevTocBtn.addEventListener('click', async ()=>{
+        await __gotoPrevToc();
+    });
+
+    _nextTocBtn.addEventListener('click', async ()=>{
+        const __curReadTocUrl = info.getCurInfoReadTocUrl();
+        const _nextUrl = toc.getNextTocUrl(__curReadTocUrl);
+        if(_nextUrl){
+            const _text = await toc.getContentByTocUrl(_nextUrl, info.getCurrentInfo().source.sourceUrl);
+            const tocName = toc.getTocNameByUrl(_nextUrl);
+            await toc.setContent(_text, tocName, info.getCurrentInfo().name, _nextUrl);
+            __init();
         }
     });
+
+    _tocPageBtn.addEventListener('click',()=>{
+        utils.gotoPage('toc');
+    });
+
+
 
     backBtn.addEventListener('click', (e)=>{ utils.backPage(); });
 

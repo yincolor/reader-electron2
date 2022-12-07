@@ -490,6 +490,17 @@ const shelfManager = (function () {
         }
     }
 
+    async function __deleteBookFromShelf(bookUrl){
+        await _connection.remove({
+            from : _t_toc_content_data_name,
+            where: {book_url: bookUrl}
+        });
+        await _connection.remove({
+            from: _t_shelf_data_name,
+            where:{url: bookUrl}
+        });
+    }
+
 
     return {
         getBookInoByUrl: __getBookInoByUrl,
@@ -504,6 +515,7 @@ const shelfManager = (function () {
         setContentByUrl: __setContentByUrl,
         setTocDownloadStateByUrl: __setTocDownloadStateByUrl,
         setBookReadTocUrl: __setBookReadTocUrl,
+        deleteBookFromShelf:__deleteBookFromShelf,
     }
 })();
 
