@@ -1,21 +1,5 @@
 /** 处理页面事件 */
 
-/** 通过给节点元素添加 hide class 使节点隐藏和显示 */
-// function _hideDom(dom) { if (dom.classList.contains('hide') == false) { dom.classList.add('hide'); } }
-// function _displayDom(dom) { dom.classList.remove('hide'); }
-// function _changeDomHide(dom) {
-//     if (dom.classList.contains('hide')) {
-//         dom.classList.remove('hide');
-//     } else { dom.classList.add('hide'); }
-// }
-
-// /** 切换页面，窗口中只会让一个页面显示，其他都隐藏 */
-// function changePage(pageName) {
-//     for (const page of document.getElementsByClassName('page')) {
-//         if (page.classList.contains(pageName)) { _displayDom(page); } else { _hideDom(page); }
-//     }
-// }
-
 
 
 /*静态工具方法*/
@@ -211,7 +195,7 @@ const sourceManager = (function () {
             limit: 1
         });
         if (results.length > 0) {
-            utils.log('sourceManager.__getSourceByUrl', '查询书源'); console.log(results[0]);
+            // utils.log('sourceManager.__getSourceByUrl', '查询书源'); console.log(results[0]);
             return results[0];
         } else {
             utils.log('sourceManager.getSourceByUrl', "查询书源失败：没有这个网站的书源。");
@@ -294,6 +278,7 @@ const sourceManager = (function () {
                 source_url: { in: (urls.constructor == String ? [urls] : urls) }
             }
         });
+
         return rowsDeleted;
     }
 
@@ -336,10 +321,10 @@ const shelfManager = (function () {
     async function __getAllBook() {
         const results = await _connection.select({ from: _t_shelf_data_name });
         if (results.length > 0) {
-            utils.log('shelfManager.__getAllBook', '查询书架成功，书架上的书籍数量：' + results.length);
+            // utils.log('shelfManager.__getAllBook', '查询书架成功，书架上的书籍数量：' + results.length);
             return results;
         } else {
-            utils.log('shelfManager.__getAllBook', "查询书架失败，当前书架没有书或者数据库异常");
+            // utils.log('shelfManager.__getAllBook', "查询书架失败，当前书架没有书或者数据库异常");
             return [];
         }
     }
@@ -490,14 +475,14 @@ const shelfManager = (function () {
         }
     }
 
-    async function __deleteBookFromShelf(bookUrl){
+    async function __deleteBookFromShelf(bookUrl) {
         await _connection.remove({
-            from : _t_toc_content_data_name,
-            where: {book_url: bookUrl}
+            from: _t_toc_content_data_name,
+            where: { book_url: bookUrl }
         });
         await _connection.remove({
             from: _t_shelf_data_name,
-            where:{url: bookUrl}
+            where: { url: bookUrl }
         });
     }
 
@@ -515,7 +500,7 @@ const shelfManager = (function () {
         setContentByUrl: __setContentByUrl,
         setTocDownloadStateByUrl: __setTocDownloadStateByUrl,
         setBookReadTocUrl: __setBookReadTocUrl,
-        deleteBookFromShelf:__deleteBookFromShelf,
+        deleteBookFromShelf: __deleteBookFromShelf,
     }
 })();
 
@@ -533,37 +518,69 @@ const downloadManager = (function () {
     /** 刷新下载列表，相当于获取在当前时刻等待下载状态的章节，然后给等待下载队列赋值 */
     async function __freshDownloadWaitQueue() {
         _downloadWaitQueue = await __getHaveDownloadToc();
+        // console.log('__freshDownloadWaitQueue queue length is ', _downloadWaitQueue.length);
+        return _downloadWaitQueue.length;
     }
 
     async function __downloadOnce() {
-        if (_downloadWaitQueue.length > 0) {
+        const queue_len = await __freshDownloadWaitQueue();
+        if (queue_len > 0) {
             const tocItem = _downloadWaitQueue.shift();
             const source = await __getSourceByTocObj(tocItem);
             const _href = tocItem.href;
+            await __updateDownloadStateByTocUrl(_href, 0, 3);
             const _content = (await toc.requestParseContent(_href, source));
-            if (_content) {
-                await shelfManager.setContentByUrl(_href, _content);
+            if (_content && _content.length && _content.length > 0) {
+                await shelfManager.setContentByUrl(_href, _content.join('<br>'));
                 await shelfManager.setTocDownloadStateByUrl(_href, 1);
-                utils.log('downloadManager', '下载完毕：' + _href);
-            }else {
+                // utils.log('downloadManager', '下载完毕：' + _href);
+            } else {
                 await shelfManager.setTocDownloadStateByUrl(_href, 2);
                 utils.log('downloadManager', '下载失败：' + _href);
             }
         }
+
     }
 
     async function __init() {
         __freshDownloadWaitQueue();
         setInterval(() => {
             __downloadOnce();
+            cache.updateCacheList();
         }, 2000);
+    }
+
+    /** 获取所有匹配的章节，匹配book_url */
+    async function __getDownloadTocByBookUrl(bookUrl) {
+        return await _connection.select({ from: _t_toc_content_data_name, where: { book_url: bookUrl } });
     }
 
     /** 获取当前toc列表中处于等待下载状态的章节项 */
     async function __getHaveDownloadToc() {
         return await _connection.select({ from: _t_toc_content_data_name, where: { download_state: 0 } });
     }
-
+    /** 更新某个书籍匹配的状态为新的状态 */
+    async function __updateDownloadStateByBookUrl(bookUrl, old_state, new_state) {
+        return await _connection.update({
+            in: _t_toc_content_data_name,
+            set: { download_state: new_state },
+            where: {
+                book_url: bookUrl,
+                download_state: old_state
+            }
+        });
+    }
+    /** 更新某个章节的匹配的状态为新的状态 */
+    async function __updateDownloadStateByTocUrl(tocUrl, old_state, new_state){
+        return await _connection.update({
+            in: _t_toc_content_data_name,
+            set: { download_state: new_state },
+            where: {
+                href: tocUrl,
+                download_state: old_state
+            }
+        });
+    }
     /** 根据章节项获取归属的书源 */
     async function __getSourceByTocObj(tocObj) {
         const bookUrl = tocObj.book_url;
@@ -581,5 +598,7 @@ const downloadManager = (function () {
     return {
         init: __init,
         getDownloadWaitQueue: __getDownloadWaitQueue,
+        getDownloadTocByBookUrl: __getDownloadTocByBookUrl,
+        updateDownloadStateByBookUrl: __updateDownloadStateByBookUrl,
     }
 })();

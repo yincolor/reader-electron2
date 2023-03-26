@@ -1,0 +1,49 @@
+.cache .view {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+}
+
+.cache .view .head {
+    position: absolute;
+    height: var(--bar-height);
+    width: 100%;
+    top: 0;
+    left: 0;
+    background-color: #AA7A7A;
+
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.cache .view .body {
+    position: absolute;
+    top: var(--bar-height);
+    bottom: 0;
+    left: 0; right: 0;
+    background-color: #fff;
+}
+
+.cache .view .head .btn{
+    min-width: calc( var(--bar-height) + 20px);
+    text-align: center;
+    line-height: var(--bar-height);
+}
+
+.cache .view .body .cache-list{
+    position: absolute;
+    overflow-y: scroll;
+    top: 0; bottom: 0; left: 0; right: 0;
+}
+
+.cache .view .body .cache-list .cache-item{
+    --search-item-height: 2em;
+    min-height: var(--search-item-height);
+    line-height: var(--search-item-height);
+    padding: 10px;
+    margin: 3px;
+    /* white-space: pre-wrap; */
+    background-color: rgb(208, 208, 208);
+    color: rgb(0, 0, 0);
+}

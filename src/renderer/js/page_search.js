@@ -3,6 +3,7 @@ const search = (function () {
     const _searchPage = _container.getElementsByClassName('page search')[0];
     const _view = _searchPage.getElementsByClassName('view')[0];
     const _head = _view.getElementsByClassName('head')[0];
+    const _foot = _view.getElementsByClassName('foot')[0];
     const _backBtn = _head.getElementsByClassName('btn btn-back-page')[0];
     const _searchBtn = _head.getElementsByClassName('btn btn-search')[0];
     const _searchBarInput = _head.getElementsByClassName('search-bar-input')[0];
@@ -132,7 +133,9 @@ const search = (function () {
             searchList = ps.searchBookList;
             nextUrl = ps.nextUrl;
         } catch (err) {
-            utils.log('search.__requestParseSearch', '解析搜索DOM失败，[' + source.sourceName + ":" + source.sourceUrl + ']书源出错，返回空数组');
+            const err_str = '解析搜索DOM失败，[' + source.sourceName + ":" + source.sourceUrl + ']书源出错，返回空数组';
+            utils.log('search.__requestParseSearch', err_str);
+            _foot.innerText = err_str; 
             return [];
         }
         if (nextUrl) {
@@ -150,9 +153,12 @@ const search = (function () {
     /** 获取生效的书源插件，循环请求书源列表 */
     async function* search(key) {
         for (const source of sourceManager.sourceList) {
-            utils.log('search.*search', '请求: ' + key + '，书源: ' + source.sourceName);
+            const req_log_str = '请求: ' + key + '，书源: ' + source.sourceName; 
+            utils.log('search.*search', req_log_str);
+            _foot.innerText = req_log_str;
             const searchList = await __requestParseSearch(key, source);
             utils.log('search.*search', '获取到一个搜索列表，长度：' + searchList.length);
+
             yield { searchList: searchList, source: source };
         }
         return 0;

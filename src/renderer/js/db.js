@@ -48,10 +48,6 @@ const db = ( function(){
         tables: [t_source_data, t_shelf_data, t_toc_content_data]
     }
 
-    // const meta_table = { 
-    //     t_source_data: t_source_data
-    // }
-
     const db = {
         meta_db: meta_db,
         // meta_table:meta_table,

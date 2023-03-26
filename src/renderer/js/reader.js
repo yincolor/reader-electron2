@@ -1,8 +1,4 @@
 /*书源管理，书籍搜索*/
-// const request = require('./request.js');
-// const parseHtml = require('./parse_html.js');
-// const utils = require('./utils.js');
-// const pro_cfg = require('./project.config.js');
 
 const SLEEP_TIME = 1000; /*设定每次请求完成后等待多久返回结果，以避免被发现是爬虫*/
 

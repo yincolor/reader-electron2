@@ -2,10 +2,8 @@
 
 document.getElementsByClassName('dialog_layer')[0].addEventListener('click', (e) => {
     console.log('dialog layer 被点击', e.target, e.target.innerText);
-    if (e.target.classList.contains('dialog_layer')) {
-        __hideDialogLayer(); __clearDialogLayer();
-    }
-})
+    // if (e.target.classList.contains('dialog_layer')) { __hideDialogLayer(); __clearDialogLayer(); }
+});
 
 function __onDialogMenuItemClicked(ele, callback) {
     const str = ele.innerText;
@@ -41,6 +39,13 @@ function __createDialogAlert(str) {
     return alertDiv;
 }
 
+function __createDialogLoading(str){
+    const loadingDiv = document.createElement('div');
+    loadingDiv.classList.add('dialog', 'loading');
+    loadingDiv.innerText = str;
+    return loadingDiv;
+}
+
 function __hideDialogLayer() {
     document.getElementsByClassName('dialog_layer')[0].classList.add('hide');
 }
@@ -68,6 +73,13 @@ const dialog = {
         const alertDiv = __createDialogAlert(str);
         document.getElementsByClassName('dialog_layer')[0].append(alertDiv);
         __showDialogLayer();
-    }
+    },
+    loading: function(str){
+        __hideDialogLayer(); __clearDialogLayer();
+        const loadingDiv = __createDialogLoading(str);
+        document.getElementsByClassName('dialog_layer')[0].append(loadingDiv);
+        __showDialogLayer();
+    },
+
 
 }

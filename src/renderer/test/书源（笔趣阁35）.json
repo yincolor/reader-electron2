@@ -1,0 +1,44 @@
+{
+    "sourceName": "999小说网",
+    "sourceUrl": "https://m.x999xs.com/",
+    "default":{
+        "header":{
+            "User-Agent":"Mozilla/5.0 (Linux; U; Android 4.0.2; en-us; Galaxy Nexus Build/ICL53F) AppleWebKit/534.30 (KHTML, like Gecko)Version/4.0 Mobile Safari/534.30; 360Spider",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8", 
+            "Accept-Language": "zh-CN,zh;q=0.8,en-US;q=0.5,en;q=0.3"
+        },
+        "encoding":"utf-8"
+    },
+    "search":{
+        "request":{
+            "url":"https://m.x999xs.com/search.php?keyword=@{searchKey}&submit=",
+            "type":"GET",
+            "encoding":"utf-8",
+            "postBody":{}
+        },
+        "list":"return html.getElementsByClassName('bookbox'); ",
+        "href":"return 'https://m.x999xs.com'+html.getElementsByTagName('a')[0].getAttribute('href');",
+        "name":"return html.getElementsByTagName('a')[1].innerText.trim();",
+        "author":"return html.getElementsByClassName('author')[0].innerText.slice(3).trim();",
+        "latestChapter":"return html.getElementsByClassName('update')[0].getElementsByTagName('a')[0].innerText.trim();",
+        "nextUrl":"return null;"
+    },
+    "info":{
+        "name":"return html.getElementsByClassName('block_txt2')[0].getElementsByTagName('h2')[0].innerText.trim();",
+        "author":"return html.getElementsByClassName('block_txt2')[0].getElementsByTagName('p')[2].innerText.slice(3).trim();",
+        "intro":"return html.getElementsByClassName('intro_info')[0].innerText.trim();",
+        "latestChapter":"return html.getElementsByClassName('chapter')[0].getElementsByTagName('a')[0].innerText.trim(); ",
+        "tocUrl": "return 'LOCAL_URL'"
+    },
+    "toc":{
+        "list":"let chapters = html.getElementsByClassName('chapter'); let lh; if(chapters.length > 1){ lh = chapters[1]; }else { lh = chapters[0]; } return lh.getElementsByTagName('li');",
+        "name":"return html.getElementsByTagName('a')[0].innerText;",
+        "href":"return 'https://m.x999xs.com' + html.getElementsByTagName('a')[0].getAttribute('href');",
+        "nextUrl":"let right = html.getElementsByClassName('right')[0]; let a = right.getElementsByTagName('a')[0];const _nph = a.getAttribute('href'); if(_nph.indexOf('javascript')>=0){ console.log('已经探索到了最后一页了，后面就没有了。'); return null;}else{return 'https://m.x999xs.com' + _nph;}"
+    },
+    "content":{
+        "text":"return html.getElementById('nr1').innerHTML.replaceAll('<br>','\\n');",
+        "nextUrl":"const _nph = html.getElementById('pt_next').getAttribute('href'); console.log('获取nextUrl', _nph); if(_nph.indexOf('_')>0){return 'https://m.x999xs.com' + _nph;}else{return null;}"
+    }
+
+}

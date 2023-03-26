@@ -27,7 +27,7 @@ const content = (function () {
         return __curPageIndex;
     }
 
-    function __init(){
+    function __init() {
         utils.log('content.__init', '执行内容页面初始化')
         __resetContentMeta();
     }
@@ -50,15 +50,15 @@ const content = (function () {
         textContent.innerHTML = _str;
         __resetContentMeta();
     }
-    function __setBookName(_str){
+    function __setBookName(_str) {
         bookNameDiv.innerHTML = '《' + _str + '》';
     }
-    function __setTocName(_str){
+    function __setTocName(_str) {
         tocNameDiv.innerHTML = _str;
     }
 
-    function __rendererContent(contentStr, tocName, bookName){
-        __setText(contentStr); 
+    function __rendererContent(contentStr, tocName, bookName) {
+        __setText(contentStr);
         __setBookName(bookName);
         __setTocName(tocName);
     }
@@ -71,9 +71,9 @@ const content = (function () {
         const curPageIndexOld = __getCurPageIndex();
         const curPageIndexNew = curPageIndexOld - 1 < 0 ? 0 : curPageIndexOld - 1;
         __setCurPageIndex(curPageIndexNew);
-        if(curPageIndexOld == curPageIndexNew){
+        if (curPageIndexOld == curPageIndexNew) {
             return 1;
-        }else {
+        } else {
             return -1;
         }
     }
@@ -83,15 +83,15 @@ const content = (function () {
         const curPageIndexOld = __getCurPageIndex();
         const curPageIndexNew = curPageIndexOld + 1 >= __curPageNum ? curPageIndexOld : curPageIndexOld + 1;
         __setCurPageIndex(curPageIndexNew);
-        if(curPageIndexOld == curPageIndexNew){
+        if (curPageIndexOld == curPageIndexNew) {
             return 1;
-        }else {
+        } else {
             return -1;
         }
     }
 
     /** 翻向当前章节最后一页 */
-    function __pageBackwardToEnd(){
+    function __pageBackwardToEnd() {
         const curPageIndexNew = __curPageNum - 1;
         __setCurPageIndex(curPageIndexNew);
     }
@@ -112,18 +112,18 @@ const content = (function () {
     });
 
     /** 设置对内容页面显示和隐藏的监听 */
-    const class_option = { attributes: true, attributeFilter:['class'] };
-    const md = new MutationObserver( async (mutationRecord,observer) => {
+    const class_option = { attributes: true, attributeFilter: ['class'] };
+    const md = new MutationObserver(async (mutationRecord, observer) => {
         // console.log(mutationRecord);
         // console.log(observer);
         const m0 = mutationRecord[0];
-        if(m0.target.classList.contains('hide') == false){
+        if (m0.target.classList.contains('hide') == false) {
             /*只有在进入内容页面的时候 才重加载内容*/
             console.log('重新初始化内容页面：', m0.target);
             __init();
         }
     });
-    md.observe( contentPage , class_option);
+    md.observe(contentPage, class_option);
 
     /** 文本阅读界面事件 */
     contentBody.addEventListener('click', async (e) => {
@@ -156,64 +156,68 @@ const content = (function () {
                 _changeDomHide(contentFoot);
                 break;
             }
-            case '上一页': { 
+            case '上一页': {
                 const state = __pageForward();
-                if(state == 1){
+                if (state == 1) {
                     await __gotoPrevToc();
                     __pageBackwardToEnd();
                 }
-                break; 
+                break;
             }
-            case '下一页': { 
-                const state = __pageBackward(); 
-                if(state == 1){
+            case '下一页': {
+                const state = __pageBackward();
+                if (state == 1) {
                     _nextTocBtn.click();
                 }
-                break; 
+                break;
             }
         }
-    }); 
+    });
 
     /** 切换到前一个章节，并且重置内容页面 */
-    async function __gotoPrevToc(){
+    async function __gotoPrevToc() {
         const __curReadTocUrl = info.getCurInfoReadTocUrl();
         const _prevUrl = toc.getPrevTocUrl(__curReadTocUrl);
-        if(_prevUrl){
+        if (_prevUrl) {
+            dialog.loading("正在请求并解析章节内容");
             const _text = await toc.getContentByTocUrl(_prevUrl, info.getCurrentInfo().source.sourceUrl);
             const tocName = toc.getTocNameByUrl(_prevUrl);
             await toc.setContent(_text, tocName, info.getCurrentInfo().name, _prevUrl);
             __init();
+            dialog.close();
         }
     }
 
-    _prevTocBtn.addEventListener('click', async ()=>{
+    _prevTocBtn.addEventListener('click', async () => {
         await __gotoPrevToc();
     });
 
-    _nextTocBtn.addEventListener('click', async ()=>{
+    _nextTocBtn.addEventListener('click', async () => {
         const __curReadTocUrl = info.getCurInfoReadTocUrl();
         const _nextUrl = toc.getNextTocUrl(__curReadTocUrl);
-        if(_nextUrl){
+        if (_nextUrl) {
+            dialog.loading("正在请求并解析章节内容");
             const _text = await toc.getContentByTocUrl(_nextUrl, info.getCurrentInfo().source.sourceUrl);
             const tocName = toc.getTocNameByUrl(_nextUrl);
             await toc.setContent(_text, tocName, info.getCurrentInfo().name, _nextUrl);
             __init();
+            dialog.close();
         }
     });
 
-    _tocPageBtn.addEventListener('click',()=>{
+    _tocPageBtn.addEventListener('click', () => {
         utils.gotoPage('toc');
     });
 
 
 
-    backBtn.addEventListener('click', (e)=>{ utils.backPage(); });
+    backBtn.addEventListener('click', (e) => { utils.backPage(); });
 
     return {
-        init: __init, 
-        setText:__setText,
-        setBookName:__setBookName,
+        init: __init,
+        setText: __setText,
+        setBookName: __setBookName,
         setTocName: __setTocName,
-        renderer:__rendererContent
+        renderer: __rendererContent
     }
 })();

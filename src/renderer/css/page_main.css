@@ -62,6 +62,8 @@
     --book-item-height:50px;
     min-height: var(--book-item-height);
     padding: 0 20px;
+    margin: 3px;
+    /* background-color: #999999; */
 }
 
 .main .view .body .shelf .book:not(:last-child){

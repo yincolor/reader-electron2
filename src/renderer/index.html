@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="./css/page_toc.css">
     <link rel="stylesheet" href="./css/page_content.css">
     <link rel="stylesheet" href="./css/page_setting.css">
+    <link rel="stylesheet" href="./css/page_cache.css">
     <link rel="stylesheet" href="./css/dialog_layer.css">
 
 </head>
@@ -67,8 +68,11 @@
                 </div>
                 <div class="body">
                     <div class="search-list">
-                        <div class="item btn">尚无搜索结果</div>
+                        <div class="item btn">null</div>
                     </div>
+                </div>
+                <div class="foot">
+                    尚无搜索结果
                 </div>
             </div>
         </div>
@@ -136,7 +140,7 @@
                 </div>
                 <div class="foot">
                     <div class="btn add-shelf">放入书架</div>
-                    <div class="btn download-book"> 缓存 </div>
+                    <!-- <div class="btn download-book"> 缓存 </div> -->
                     <div class="btn read-book"> 阅读 </div>
                 </div>
             </div>
@@ -193,10 +197,33 @@
                 <div class="body">
                     <div class="btn source-plugin">书源配置</div>
                     <!-- <div class="btn">替换净化</div> -->
-                    <!-- <div class="btn">预下载章节</div> -->
+                    <div class="btn cache">缓存数据</div>
                     <!-- <div class="btn">默认用户代理</div> -->
                     <!-- <div class="btn">记录日志（关闭）</div> -->
                     <div class="btn about">关于</div>
+                </div>
+            </div>
+        </div>
+        <!-- 缓存数据页面 -->
+        <div class="page cache hide"> 
+            <div class="view">
+                <div class="head">
+                    <div class="btn btn-back-page">🔙 返回</div>
+                    <div>缓存数据页面</div>
+                </div>
+                <div class="body">
+                    <div class= "cache-list">
+                        <div class="cache-item">
+                            <div>书名：《XXXXXXXXX》</div>
+                            <div>网址：https://www.aaxzxx/asda/123</div>
+                            <div>等待缓存：123 缓存完毕：41 </div>
+                        </div>
+                        <div class="cache-item">
+                            <div>书名：《XXXXXXXXX》</div>
+                            <div>网址：https://www.aaxzxx/asda/123</div>
+                            <div>等待缓存：123 缓存完毕：41 </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -236,6 +263,9 @@
     <script src="./js/page_setting.js"></script>
     <script src="./js/page_plugin.js"></script>
     <script src="./js/page_about.js"></script>
+    <script src="./js/page_cache.js"></script>
+
+    <script src="./js/dialog.js"></script>
     
     <script process>
         /** 流程管理，执行初始化数据库、页面等操作，在初始化结束后屏蔽loading弹窗，显示主页，让用户开始操作 */
