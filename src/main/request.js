@@ -1,3 +1,5 @@
+console.log((new Date()).toLocaleString() + ' [request.js] - Start load request.js script. ');
+
 const fetch = require('node-fetch');
 const iconv = require('iconv-lite');
 const fs = require('fs');
@@ -19,11 +21,7 @@ function isNullObj(obj) {
 
 async function get(url, header, encode) {
     try {
-        const res = await fetch(url, {
-            method: 'GET',
-            timeout: DEFAULT_TIMEOUT,
-            headers: isNullObj(header) ? DEFAULT_HEADER : header
-        });
+        const res = await fetch(url, { method: 'GET',timeout: DEFAULT_TIMEOUT,headers: isNullObj(header) ? DEFAULT_HEADER : header });
         const buf = Buffer.from(await res.arrayBuffer());
         const str = iconv.decode(buf, encode);
         return str;
@@ -35,36 +33,12 @@ async function get(url, header, encode) {
 
 async function post(url, body, header, encode) {
     try {
-        const res = await fetch(url, {
-            method: 'post', timeout: DEFAULT_TIMEOUT,
-            body: typeof (body) == 'string' ? body : JSON.stringify(body),
-            headers: isNullObj(header) ? DEFAULT_HEADER : header
-        });
+        const res = await fetch(url, { method: 'post', timeout: DEFAULT_TIMEOUT, body: typeof (body) == 'string' ? body : JSON.stringify(body), headers: isNullObj(header) ? DEFAULT_HEADER : header });
         const buf = Buffer.from(await res.arrayBuffer());
         const str = iconv.decode(buf, encode);
-        console.log(str) ; 
         return str;
     } catch (error) {
         console.log(error);
-        return null;
-    }
-}
-
-
-/**
- * HTTP请求方法
- * @param {String} url 网址
- * @param {String} type 请求类型：GET|POST，默认GET
- * @param {Object} body POST请求的请求体
- * @param {Object} headers 请求头
- * @returns 返回请求的
- */
-async function requestTmp(url, type = 'GET', body = null, header = null) {
-    if (type == 'GET') {
-        return await get(url, header);
-    } else if (type == 'POST') {
-        return await post(url, body, header);
-    } else {
         return null;
     }
 }
@@ -81,16 +55,12 @@ async function request(url, type = 'GET', args = {}) {
     const header = args.header || null;
     const body = args.body || null;
     const encode = args.encode || 'utf-8';
-    if (type == 'GET') {
-        return await get(url, header, encode);
-    } else if (type == 'POST') {
-        return await post(url, body, header, encode);
-    } else if(type == 'LOCAL'){
-        return fs.readFileSync(url).toString('utf8');
-    } else {
-        return null;
-    }
+    if (type == 'GET') { return await get(url, header, encode);
+    } else if (type == 'POST') { return await post(url, body, header, encode);
+    } else if(type == 'LOCAL'){ return fs.readFileSync(url).toString('utf8');
+    } else { return null; }
 }
 
+console.log((new Date()).toLocaleString() + ' [request.js] - Script request.js load completed. ');
 
 module.exports = request; 

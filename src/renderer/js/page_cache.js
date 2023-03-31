@@ -11,6 +11,19 @@ const cache = (function () {
         utils.backPage();
     });
 
+    /** 下载文件 */
+    function __downloadFile(f){
+        var a = document.createElement('a'); 
+        var objectUrl = URL.createObjectURL(f); 
+        a.href = objectUrl; 
+        a.download = f.name; 
+        document.body.appendChild(a); 
+        a.click(); 
+
+        document.body.removeChild(a); 
+        URL.revokeObjectURL(objectUrl) ; 
+    }
+
     function __createCacheItemDiv(book){
 
         const cacheItemDiv = document.createElement('div');
@@ -21,6 +34,7 @@ const cache = (function () {
         const faileReloadBtn = document.createElement('button');
         const stopDownloadingBtn = document.createElement('button');
         const startWaitDownloadBtn = document.createElement('button');
+        const outTextBtn = document.createElement('button') ; 
         const btnGroupDiv = document.createElement('div');
 
         bookNameDiv.innerText = '书名：'+book.name; 
@@ -29,9 +43,11 @@ const cache = (function () {
         faileReloadBtn.innerText       = '下载失败=>等待下载';
         stopDownloadingBtn.innerText   = '正在下载=>尚未下载';
         startWaitDownloadBtn.innerText = '尚未下载=>正在下载';
+        outTextBtn.innerText = '导出到本地'; 
 
-        btnGroupDiv.append(faileReloadBtn, stopDownloadingBtn, startWaitDownloadBtn);
-        cacheItemDiv.append(bookNameDiv,bookUrlDiv,stateDiv, btnGroupDiv)
+
+        btnGroupDiv.append(faileReloadBtn, stopDownloadingBtn, startWaitDownloadBtn, outTextBtn);
+        cacheItemDiv.append(bookNameDiv, bookUrlDiv, stateDiv, btnGroupDiv)
 
         faileReloadBtn.addEventListener('click', async ()=>{
             console.log(book.url, 'click faileReloadBtn.');
@@ -48,6 +64,17 @@ const cache = (function () {
             console.log(book.url, 'click startWaitDownloadBtn.');
             await downloadManager.updateDownloadStateByBookUrl(book.url, -1, 0);
             __updateCacheList();
+        });
+
+        outTextBtn.addEventListener('click', async ()=>{
+            const contentList = await downloadManager.getDownloadTocByBookUrl(book.url);
+            const arr = ['《' + book.name + '》'];
+            for(const c of contentList){
+                arr.push(c.name, c.content);
+            }
+            const str = arr.join('\n');
+            const file = new File([str], book.name+".txt", {type: 'text/plain', });
+            __downloadFile(file); 
         });
 
         return cacheItemDiv;

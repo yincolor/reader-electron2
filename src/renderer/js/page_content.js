@@ -28,7 +28,7 @@ const content = (function () {
     }
 
     function __init() {
-        utils.log('content.__init', '执行内容页面初始化')
+        // utils.log('content.__init', '执行内容页面初始化')
         __resetContentMeta();
     }
 
@@ -106,7 +106,7 @@ const content = (function () {
 
     /** 设置窗口尺寸变化时的监听 */
     window.addEventListener('resize', (_) => {
-        console.log('window resize: ', window.innerWidth, window.innerHeight);
+        // console.log('window resize: ', window.innerWidth, window.innerHeight);
         /*更新curPageIndex和curPageNum，现在先暂定为重置为默认值然后重新计算*/
         __init();
     });

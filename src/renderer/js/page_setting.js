@@ -7,6 +7,7 @@ const setting = (function(){
     const _backBtn = _head.getElementsByClassName('btn btn-back-page')[0];
     const _sourcePluginBtn = _body.getElementsByClassName('btn source-plugin')[0];
     const _cacheBtn = _body.getElementsByClassName('btn cache')[0];
+    const _devToolsBtn = _body.getElementsByClassName('btn dev-tools')[0]; 
     const _aboutBtn = _body.getElementsByClassName('btn about')[0];
 
     _sourcePluginBtn.addEventListener('click', (e)=>{
@@ -18,7 +19,9 @@ const setting = (function(){
     _aboutBtn.addEventListener('click', (e)=>{
         utils.gotoPage('about');
     });
-
+    _devToolsBtn.addEventListener('click', ()=>{ 
+        local.openDevTools();
+    }); 
     _cacheBtn.addEventListener('click', ()=>{
         utils.gotoPage('cache');
     });
