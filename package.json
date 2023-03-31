@@ -4,7 +4,9 @@
   "description": "reader gui by electron.",
   "main": "./src/main/main.js",
   "scripts": {
-    "test": "electron ."
+    "test": "electron .",
+    "build-win32": "electron-packager . reader-electron2 --platform=win32 --arch=x64 --out=../OUT --asar --ignore=res/ --extra-resource=res/ --electron-version=20.1.4 --overwrite",
+    "build-linux": "electron-packager . reader-electron2 --platform=linux --arch=x64 --out=../OUT --asar --ignore=res/ --extra-resource=res/ --electron-version=20.1.4 --overwrite"
   },
   "keywords": [
     "application",
@@ -13,6 +15,7 @@
   "author": "ty",
   "license": "GPL-3.0-or-later",
   "devDependencies": {
+    "asar": "^3.2.0",
     "electron": "^20.1.4",
     "electron-packager": "^17.1.1"
   },
