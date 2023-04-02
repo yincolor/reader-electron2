@@ -1,5 +1,5 @@
 # reader-electron2
-version: 0.1.5
+version: 0.1.6
 ***
 使用Electron做前端界面的阅读APP  
 先不做订阅源、书源发现那一套  
