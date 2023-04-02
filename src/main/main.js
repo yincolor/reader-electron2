@@ -7,15 +7,14 @@ console.log((new Date()).toLocaleString() + ' [main.js] - Library loading comple
 
 process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = true; /*阻止渲染进程弹出无用的安全警告*/
 
-// /** 根据是否已经打包返回对应的资源文件目录的路径 */
-// function __getResourceDir(){ 
-//     console.log("当前路径: ", __dirname);
-//     if(__dirname.indexOf('app.asar') >= 0){
-//         return path.join(__dirname, '../../../res/');
-//     } else {
-//         return path.join(__dirname, '../../res/') ; 
-//     }
-// }
+/** 根据是否已经打包返回对应的资源文件目录的路径 */
+function __getResourceDir(){ 
+    if(__dirname.indexOf('app.asar') >= 0){
+        return path.join(__dirname, '../../../res/');
+    } else {
+        return path.join(__dirname, '../../res/') ; 
+    }
+}
 
 /**
  * 主窗口对象
@@ -27,7 +26,7 @@ function createWindow() {
     mainWindow = new BrowserWindow({ 
         width: 700, height: 700, 
         webPreferences: { preload: path.join(__dirname, './preload.js'), devTools: true, }, 
-        icon: 'res/icon.ico'
+        icon: path.join( __getResourceDir(), './icon.ico')
     });
     mainWindow.setMenu(null);
     console.log((new Date()).toLocaleString() + ' [main.js] - icon path is: ' + path.join(__dirname, '../../..', 'res/icon.ico') );
@@ -58,3 +57,4 @@ ipcMain.handle('open-url-by-default-browser', async (e, args) => {
     opener(args.url);
 });
 ipcMain.on('open-dev-tools', () => { mainWindow.webContents.openDevTools(); });
+ipcMain.once('renderer-init-end', () => { console.log((new Date()).toLocaleString() + ' [main.js] - renderer process init end. '); });
