@@ -1,6 +1,6 @@
 {
   "name": "reader-electron2",
-  "version": "2.0.2",
+  "version": "0.1.6",
   "description": "electron app about web fiction site spider.",
   "main": "./src/main/main.js",
   "scripts": {
