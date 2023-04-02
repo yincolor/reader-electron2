@@ -20,14 +20,21 @@ const main = (function(){
             const domStr = `<div class="book btn" url='${book.url}' source_url='${book.source_url}'> <div class="name">《${book.name}》<br>作者：${book.author}<br>正在阅读：${toc.name}</div></div>`;
             div.innerHTML = domStr;
             const itemDom = div.children[0]; /*生成节点元素*/
+            /** 书籍点击事件 */
             itemDom.addEventListener('click', async (e) => {
                 const _item = e.currentTarget;
                 const _bookUrl = _item.getAttribute('url');
                 /*从数据库读取书籍信息对象*/
                 const infoObj = await shelfManager.getBookInoByUrl(_bookUrl);
                 const sourceUrl = infoObj.source_url;
-                const source = await sourceManager.getSourceByUrl(sourceUrl);
-                infoObj.source = sourceManager.str2SourceObj(source.source_json);
+                let source; 
+                if(sourceUrl != 'LOCAL_FILE_SYSTEM'){
+                    const s = await sourceManager.getSourceByUrl(sourceUrl);
+                    source = sourceManager.str2SourceObj(s.source_json);
+                }else {
+                    source = {sourceUrl: 'LOCAL_FILE_SYSTEM', sourceName: '本地文件'}
+                }
+                infoObj.source = source; 
                 /** 渲染书籍信息，并切换页面到书籍信息页面 */
                 console.log('[书架->书籍详情]', infoObj);
                 info.renderer(infoObj); 

@@ -28,7 +28,7 @@ function createWindow() {
         webPreferences: { preload: path.join(__dirname, './preload.js'), devTools: true, }, 
         icon: path.join( __getResourceDir(), './icon.ico')
     });
-    mainWindow.setMenu(null);
+    // mainWindow.setMenu(null);
     console.log((new Date()).toLocaleString() + ' [main.js] - icon path is: ' + path.join(__dirname, '../../..', 'res/icon.ico') );
     // mainWindow.setIcon( path.join( __getResourceDir(), 'icon.ico' ) );
 

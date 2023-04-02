@@ -9,6 +9,7 @@ const setting = (function(){
     const _cacheBtn = _body.getElementsByClassName('btn cache')[0];
     const _devToolsBtn = _body.getElementsByClassName('btn dev-tools')[0]; 
     const _aboutBtn = _body.getElementsByClassName('btn about')[0];
+    const _addLocalBookBtn = _body.getElementsByClassName('btn add-local-book')[0]; 
 
     _sourcePluginBtn.addEventListener('click', (e)=>{
         utils.gotoPage('plugin');
@@ -24,5 +25,8 @@ const setting = (function(){
     }); 
     _cacheBtn.addEventListener('click', ()=>{
         utils.gotoPage('cache');
+    });
+    _addLocalBookBtn.addEventListener('click', ()=>{
+        dialog.addLocalBook();
     });
 })();

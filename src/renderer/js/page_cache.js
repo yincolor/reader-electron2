@@ -115,6 +115,7 @@ const cache = (function () {
         const shelfBookList = await shelfManager.getAllBook();
         const bookList = [];
         for (const book of shelfBookList) {
+            if(book.source_url == 'LOCAL_FILE_SYSTEM'){ continue;  }
             const url = book.url;
             const tocs = await downloadManager.getDownloadTocByBookUrl(url);
             const stateMap = __groupTocsByDownloadState(tocs);

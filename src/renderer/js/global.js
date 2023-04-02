@@ -89,6 +89,52 @@ const utils = (function () {
         return (new DOMParser()).parseFromString(str, 'text/html');
     }
 
+    const __hexList = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'];
+    /** 创建一个随机的ID */
+    function __createRandID() {
+        let _str = "";
+        for (let i = 0; i < 8; i++) { _str += __hexList[Math.floor(Math.random() * 16)]; }
+        _str += '-';
+        for (let i = 0; i < 4; i++) { _str += __hexList[Math.floor(Math.random() * 16)]; }
+        _str += '-';
+        for (let i = 0; i < 4; i++) { _str += __hexList[Math.floor(Math.random() * 16)]; }
+        _str += '-';
+        for (let i = 0; i < 4; i++) { _str += __hexList[Math.floor(Math.random() * 16)]; }
+        _str += '-';
+        for (let i = 0; i < 16; i++) { _str += __hexList[Math.floor(Math.random() * 16)]; }
+        return _str;
+    }
+
+    /** 将字符串解析为小说章节内容对象列表 */
+    function __str2NovelContentList(novelText) {
+        const chapterRegex = /(?:^|\n)(\s*第.+?[章节卷集部篇]\s*.*?)\n/g;
+        const chapters = novelText.split(chapterRegex);
+        // 去掉章节标题，只保留章节内容
+        const res = [];
+        const chapterTitleRegex = /(?:^|\n)(\s*第.+?[章节卷集部篇]\s*.*?)/g;
+        for (let i = 0; i < chapters.length; i++) {
+            const chapterText = chapters[i];
+            if (chapterText.search(chapterTitleRegex) >= 0) {
+                const name = chapterText.trim();
+                const content = chapters[++i];
+                res.push({ name, content });
+            } else {
+                continue;
+            }
+        }
+        return res;
+    }
+
+    /** 读取文本文件 */
+    async function __readTextFile(textFile, textEncode) {
+        return new Promise((resolve, reject) => {
+            const fr = new FileReader();
+            fr.readAsText(textFile, textEncode);
+            fr.onload = (e) => { resolve(e.target.result); }
+            fr.onerror = () => { resolve(null); }
+        });
+    }
+
     /** 初始化页面，执行各个页面对象暴露的初始化的方法 */
     async function __initPage() {
         __log('utils.initPage', '开始初始化页面')
@@ -111,6 +157,9 @@ const utils = (function () {
         now: __now,
         log: __log,
         initPage: __initPage,
+        createRandID: __createRandID,
+        str2NovelContentList: __str2NovelContentList,
+        readTextFile:__readTextFile,
     }
 })();
 
@@ -377,9 +426,9 @@ const shelfManager = (function () {
                 toc_index: i,
                 href: toc.href,
                 name: toc.name,
-                content: '',
+                content: toc.content || '',
                 book_url: bookUrl,
-                download_state: -1
+                download_state: toc.download_state || -1
             };
             valueList.push(val);
             i++;
@@ -475,6 +524,7 @@ const shelfManager = (function () {
         }
     }
 
+    /** 从书架里删除书 */
     async function __deleteBookFromShelf(bookUrl) {
         await _connection.remove({
             from: _t_toc_content_data_name,
@@ -484,6 +534,36 @@ const shelfManager = (function () {
             from: _t_shelf_data_name,
             where: { url: bookUrl }
         });
+    }
+
+
+    /**
+     * 根据文本文件的文件字符串和文件名创建书籍放到书架上
+     * @param {String} fname 名称 作为书籍的名称 
+     * @param {String} fdata 文件内容 字符串 将要解析出章节名称和章节内容
+     */
+    async function __addBookFromText(fname, fdata) {
+        const bookId = utils.createRandID();
+        const tocs = utils.str2NovelContentList(fdata);
+        tocs.forEach((obj) => {
+            obj.book_url = bookId;
+            obj.href = "localfile://" + bookId + "/" + obj.name;
+            obj.download_state = 1;
+        });
+        utils.log('shelfManager.__addBookFromText', '向书架添加书籍');
+        await __addBook({
+            name: fname,
+            url: bookId,
+            source: { sourceUrl: 'LOCAL_FILE_SYSTEM' },
+            intro: "没有书籍描述",
+            author: '佚名',
+            latestChapter: "无",
+            tocUrl: 'LOCAL_URL',
+            read_toc_url: tocs[0].href
+        });
+        utils.log('shelfManager.__addBookFromText', '向章节列表添加书籍章节');
+        await __addBookAllToc(bookId, tocs);
+        utils.log('shelfManager.__addBookFromText', '添加结束');
     }
 
 
@@ -501,6 +581,7 @@ const shelfManager = (function () {
         setTocDownloadStateByUrl: __setTocDownloadStateByUrl,
         setBookReadTocUrl: __setBookReadTocUrl,
         deleteBookFromShelf: __deleteBookFromShelf,
+        addBookFromText: __addBookFromText,
     }
 })();
 
@@ -571,7 +652,7 @@ const downloadManager = (function () {
         });
     }
     /** 更新某个章节的匹配的状态为新的状态 */
-    async function __updateDownloadStateByTocUrl(tocUrl, old_state, new_state){
+    async function __updateDownloadStateByTocUrl(tocUrl, old_state, new_state) {
         return await _connection.update({
             in: _t_toc_content_data_name,
             set: { download_state: new_state },
