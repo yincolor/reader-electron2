@@ -1,18 +1,15 @@
 {
   "name": "reader-electron2",
   "version": "2.0.2",
-  "description": "reader gui by electron.",
+  "description": "electron app about web fiction site spider.",
   "main": "./src/main/main.js",
   "scripts": {
     "test": "electron .",
     "build-win32": "electron-packager . reader-electron2 --platform=win32 --arch=x64 --out=../OUT --asar --ignore=res/ --extra-resource=res/ --electron-version=20.1.4 --overwrite",
     "build-linux": "electron-packager . reader-electron2 --platform=linux --arch=x64 --out=../OUT --asar --ignore=res/ --extra-resource=res/ --electron-version=20.1.4 --overwrite"
   },
-  "keywords": [
-    "application",
-    "gui"
-  ],
-  "author": "ty",
+  "keywords": [ "application", "gui", "spider" ],
+  "author": "sinan",
   "license": "GPL-3.0-or-later",
   "devDependencies": {
     "asar": "^3.2.0",

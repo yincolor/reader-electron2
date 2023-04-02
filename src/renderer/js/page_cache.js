@@ -19,7 +19,6 @@ const cache = (function () {
         a.download = f.name; 
         document.body.appendChild(a); 
         a.click(); 
-
         document.body.removeChild(a); 
         URL.revokeObjectURL(objectUrl) ; 
     }
@@ -74,7 +73,9 @@ const cache = (function () {
             }
             const str = arr.join('\n');
             const file = new File([str], book.name+".txt", {type: 'text/plain', });
+            dialog.loading("正在导出文件：" + book.name); 
             __downloadFile(file); 
+            dialog.close();
         });
 
         return cacheItemDiv;
